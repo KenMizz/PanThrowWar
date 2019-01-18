@@ -1,7 +1,10 @@
 <?php
 
 declare(strict_types=1);
+
 namespace yl14\PanThrowWar;
+
+use pocketmine\Player;
 
 class PTWSession {
 
@@ -44,5 +47,52 @@ class PTWSession {
 
     public function getGameTime() : int {
         return $this->settings['gametime'];
+    }
+
+    public function getMaxPlayer() : int {
+        return $this->settings['maxplayer'];
+    }
+
+    public function getMinPlayer() : int {
+        return $this->settings['minplayer'];
+    }
+
+    public function getPlayers() : Array {
+        return $this->players;
+    }
+
+    public function getPlayer(Player $player) : ?Player {
+        if(isset($this->players[$player->getName()])) {
+            return $this->players[$player->getName()];
+        }
+        return false;
+    }
+
+    public function addPlayer(Player $player) : bool {
+        if(!isset($this->players[$player->getName()])) {
+            $this->players[$player->getName()] = $player;
+            return true;
+        }
+        return false;
+    }
+
+    public function removePlayer(Player $player) : bool {
+        if(isset($this->players[$player->getName()])) {
+            unset($this->players[$player->getName()]);
+            return true;
+        }
+        return false;
+    }
+
+    public function getStatus() : int {
+        return $this->status;
+    }
+
+    public function setStatus(int $status) : bool {
+        if(!$status == 0 or !$status == 1 or !$status == 2) {
+            return false;
+        }
+        $this->status = $status;
+        return true;
     }
 }

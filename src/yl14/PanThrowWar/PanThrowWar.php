@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace yl14\PanThrowWar;
 
 use pocketmine\plugin\PluginBase;
@@ -7,7 +9,6 @@ use pocketmine\utils\{TextFormat as TF, Config};
 use pocketmine\Player;
 
 use yl13\GameCoreAPI\GameCoreAPI as GCAPI;
-use yl13\SkyWar\SessionTask;
 
 class PanThrowWar extends PluginBase {
 
@@ -58,8 +59,26 @@ class PanThrowWar extends PluginBase {
          * 一切的入口
          * 未来filter会允许选择地图
          */
-        if(isset($filter['players'])) {
-
+        if(isset($filter['maxplayer'])) {
+            //先循环一下所有Session看看有没有可用的
+            foreach($this->Sessions as $Session) {
+                if($Session instanceof PTWSession) {
+                    $maxplayer = $Session->getMaxPlayer();
+                    if($filter['maxplayer'] == $maxplayer) { //匹配
+                        //检查Session是否处于‘等待’或‘准备’状态
+                        $Status = $Session->getStatus();
+                        if($Status == 0 or $Status == 1) {
+                            //可以进
+                            $splayers = $Session->getPlayers();
+                            if(!count($splayers) - count($players) < 0) {
+                                //确认一下想要加入的所有玩家人数会不会太多
+                                $this->joinRoom($Session->getRoomId(), $players);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -74,8 +93,86 @@ class PanThrowWar extends PluginBase {
     private function createRoom(int $roomid, String $levelname, Array $waitinglocation, Array $playinglocation, Array $settings) : bool {
         if(!isset($this->Sessions[$roomid])) {
             $this->Sessions[$roomid] = new PTWSession($this->plugin, $roomid, $levelname, $waitinglocation, $playinglocation, $settings);
-            $this->getScheduler()->scheduleRepeatingTask(new SessionTask($this->plugin, $roomid), 20)
+            if(!$this->getServer()->getLevelByName($levelname)) {
+                $result = GCAPI::getInstance()->api->getMapLoaderAPI()->create($this->gameid, $levelname);
+                if(!$result) {
+                    $this->getLogger()->warning("在ID为".TF::WHITE.$roomid.TF::YELLOW."的Session下的地图加载错误!玩家如果加入可能会导致问题!");
+                }
+            }
+            return true;
         }
+        return false;
+    }
+
+    private function getRoomById(int $roomid) : ?PTWSession {
+        if(isset($this->Sessions[$roomid])) {
+            if($this->Sessions[$roomid] instanceof PTWSession) {
+                return $this->Sessions[$roomid];
+            }
+            return false;
+        }
+        return false;
+    }
+
+    private function randRoom($filter = []) : ?Config {
+        /**
+         * filter:
+         *  maxplayer
+         *  mapname (WIP)
+         */
+        if(isset($filter['maxplayer'])) {
+            $roomdir = $this->getDataFolder()."rooms";
+            if(is_dir($roomdir)) {
+                $files = scandir($roomdir);
+                $rooms = [];
+                foreach($files as $file) {
+                    $pinfo = pathinfo($file);
+                    if($pinfo['extension'] == 'yml') {
+                        $rooms[$pinfo['basename']] = $pinfo['basename'];
+                    }
+                }
+                if(!empty($rooms)) {
+                    $matchs = [];
+                    foreach($rooms as $room) {
+                        $c = new Config($roomdir."{$room}.yml", Config::YAML); //可优化
+                        $settings = $c->get('settings');
+                        if($settings['maxplayer'] == $filter['maxplayer']) {
+                            $matchs[$room] = $room;
+                        }
+                    }
+                    if(!empty($matchs)) {
+                        shuffle($matchs);
+                        if($matchs[0] instanceof Config) {
+                            return $matchs[0];
+                        }
+                        return false;
+                    }
+                    return false;
+                }
+                return false;
+            }
+            return false;
+        }
+        $roomdir = $this->getDataFolder()."rooms";
+        if(is_dir($roomdir)) {
+            $files = scandir($roomdir);
+            $rooms = [];
+            foreach($files as $file) {
+                $pinfo = pathinfo($file);
+                if($pinfo['extension'] == 'yml') {
+                    $rooms[$pinfo['basename']] = $pinfo['basename'];
+                }
+            }
+            if(!empty($rooms)) {
+                shuffle($rooms);
+                if($rooms[0] instanceof Config) {
+                    return $rooms[0];
+                }
+                return false;
+            }
+            return false;
+        }
+        return false;
     }
 
     public function onCommand(CommandSender $sender, Command $cmd, String $label, Array $args) : bool {
@@ -121,9 +218,11 @@ class PanThrowWar extends PluginBase {
                         'z' => 0
                     ),
                     'settings' => array(
-                        'gametime' => 600,//seconds
+                        'maxplayer' => 4,
+                        'minplayer' => 2,
+                        'gametime' => 600, //seconds
                         //'money' => 100,
-                        'explodetime' => 60
+                        'explodetime' => 60 //seconds
                     )
                 );
                 $sender->sendMessage($this->prefix."开始设置房间配置文件{$name}\n走到玩家等待位置输入/pw w即可设置等待位置\n走到玩家游玩位置输入/pw p即可设置游玩位置\n当一切设置完成后，输入/pw f来完成配置");
