@@ -1,1 +1,2 @@
 # ThrowPanWar
+[English](#English)
