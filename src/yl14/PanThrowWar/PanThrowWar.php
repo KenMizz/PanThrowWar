@@ -53,7 +53,7 @@ class PanThrowWar extends PluginBase {
         $this->getLogger()->notice(TF::GREEN."初始化成功!");
     }
 
-    public function SearchRoom(Array $filter = [], Array $players) : bool {
+    public function SearchRoom(Array $filter = [], Array $players) : bool { //WIP
         /**
          * 寻找可用的房间
          * 一切的入口
@@ -65,19 +65,42 @@ class PanThrowWar extends PluginBase {
                 if($Session instanceof PTWSession) {
                     $maxplayer = $Session->getMaxPlayer();
                     if($filter['maxplayer'] == $maxplayer) { //匹配
-                        //检查Session是否处于‘等待’或‘准备’状态
-                        $Status = $Session->getStatus();
-                        if($Status == 0 or $Status == 1) {
-                            //可以进
-                            $splayers = $Session->getPlayers();
-                            if(!count($splayers) - count($players) < 0) {
-                                //确认一下想要加入的所有玩家人数会不会太多
-                                $this->joinRoom($Session->getRoomId(), $players);
-                                return true;
-                            }
+                        $result = $this->joinRoom($Session->getRoomId(), $players);
+                        if(!$result) {
+                            continue;
                         }
                     }
+                    continue;
                 }
+                continue;
+            }
+            //执行到这个代码块代表没有任何可用的房间
+            $room = $this->randRoom($filter);
+            if($room instanceof Config) {
+                $roomid = $this->randnum(8);
+                $rc = $this->createRoom($roomid, $room->get('levelname'), $room->get('waitinglocation'), $room->get('playinglocation'), $room->get('settings'));
+                if(!$rc) {
+                    foreach($players as $p) {
+                        $player = $this->getServer()->getPlayerExact($p);
+                        if($player) {
+                            $player->sendMessage(TF::YELLOW."匹配房间时出现错误!");
+                        }
+                    }
+                    $this->getLogger()->warning("ID:{$roomid},创建房间时出现错误!");
+                    return false;
+                }
+                $rj = $this->joinRoom($roomid, $players);
+                if(!$rj) {
+                    foreach($players as $p) {
+                        $player = $this->getServer()->getPlayerExact($p);
+                        if($player) {
+                            $player->sendMessage(TF::YELLOW."匹配房间时出现错误!");
+                        }
+                    }
+                    $this->getLogger()->warning("ID:{$roomid},创建房间时出现错误!");
+                    return false;
+                }
+                return true;
             }
         }
     }
@@ -93,6 +116,7 @@ class PanThrowWar extends PluginBase {
     private function createRoom(int $roomid, String $levelname, Array $waitinglocation, Array $playinglocation, Array $settings) : bool {
         if(!isset($this->Sessions[$roomid])) {
             $this->Sessions[$roomid] = new PTWSession($this->plugin, $roomid, $levelname, $waitinglocation, $playinglocation, $settings);
+            GCAPI::getInstance()->api->getChatChannelAPI()->create($this->gameid, (String)$roomid);
             if(!$this->getServer()->getLevelByName($levelname)) {
                 $result = GCAPI::getInstance()->api->getMapLoaderAPI()->create($this->gameid, $levelname);
                 if(!$result) {
