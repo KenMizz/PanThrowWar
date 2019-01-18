@@ -1,3 +1,3 @@
 # PanThrowWar
-[English](#English)
+[English](#English)<br>
 [中文](#中文)
