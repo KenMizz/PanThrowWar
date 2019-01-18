@@ -106,7 +106,7 @@ class PanThrowWar extends PluginBase {
     }
 
     private function joinRoom(int $roomid, Array $players) : bool {
-
+        //WIP
     }
 
     private function leaveRoom(int $roomid, Array $players, int $reason = 0) : bool {
