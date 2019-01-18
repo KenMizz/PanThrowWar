@@ -1,0 +1,17 @@
+name: PanThrowWar
+author: 游乐14
+version: 1.0.0
+main: yl14\PanThrowWar\PanThrowWar
+api:
+  - 3.5.5
+
+commands:
+  pw:
+    permission: pw.op
+    description: ThrowPanWar
+    usage: 输入/pw help查看帮助
+
+permissions:
+  pw.op:
+    default: op
+    description: none
