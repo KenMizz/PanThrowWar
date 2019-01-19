@@ -7,6 +7,7 @@ namespace yl14\PanThrowWar;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\{TextFormat as TF, Config};
 use pocketmine\Player;
+use pocketmine\level\Position;
 
 use yl13\GameCoreAPI\GameCoreAPI as GCAPI;
 
@@ -114,11 +115,36 @@ class PanThrowWar extends PluginBase {
     }
 
     private function joinRoom(int $roomid, Array $players) : bool {
-        //WIP
+        $room = $this->getRoomById($roomid);
+        if($room instanceof PTWSession) {
+            $Status = $room->getStatus();
+            if($Status == 0 or $Status == 1) { //可以进入的状态
+                $leftplayers = count($room->getMaxPlayer()) - count($room->getPlayers());
+                if(!$leftplayers - count($players) < 0) { //防止超过可进的玩家限制从而导致插件错误
+                    foreach($players as $p) {
+                        if($p instanceof Player) {
+                            if($p->isOnline()) {
+                                $this->InGame[$p->getName()] = $roomid;
+                                GCAPI::getInstance()->api->getChatChannelAPI()->addPlayer($this->gameid, (String)$roomid, $players);
+                                GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW."{$p->getName()}".TF::WHITE."加入了房间");
+                                $waitinglocation = $room->getWaitingLocation();
+                                $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelByName($room->getLevelName())));
+                            }
+                            continue;
+                        }
+                        continue;
+                    }
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
+        return false;
     }
 
     private function leaveRoom(int $roomid, Array $players, int $reason = 0) : bool {
-
+        //TODO
     }
 
     private function createRoom(int $roomid, String $levelname, Array $waitinglocation, Array $playinglocation, Array $settings) : bool {
@@ -142,6 +168,13 @@ class PanThrowWar extends PluginBase {
                 return $this->Sessions[$roomid];
             }
             return false;
+        }
+        return false;
+    }
+
+    public function isPlayerInGame(Player $player) : bool {
+        if(isset($this->InGame[$player->getName()])) {
+            return true;
         }
         return false;
     }
