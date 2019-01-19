@@ -53,7 +53,7 @@ class PanThrowWar extends PluginBase {
         $this->getLogger()->notice(TF::GREEN."初始化成功!");
     }
 
-    public function SearchRoom(Array $filter = [], Array $players) : bool { //WIP
+    public function SearchRoom(Array $filter = [], Array $players) : bool { 
         /**
          * 寻找可用的房间
          * 一切的入口
@@ -69,6 +69,7 @@ class PanThrowWar extends PluginBase {
                         if(!$result) {
                             continue;
                         }
+                        return true;
                     }
                     continue;
                 }
@@ -80,28 +81,35 @@ class PanThrowWar extends PluginBase {
                 $roomid = $this->randnum(8);
                 $rc = $this->createRoom($roomid, $room->get('levelname'), $room->get('waitinglocation'), $room->get('playinglocation'), $room->get('settings'));
                 if(!$rc) {
-                    foreach($players as $p) {
-                        $player = $this->getServer()->getPlayerExact($p);
-                        if($player) {
-                            $player->sendMessage(TF::YELLOW."匹配房间时出现错误!");
-                        }
-                    }
-                    $this->getLogger()->warning("ID:{$roomid},创建房间时出现错误!");
                     return false;
                 }
                 $rj = $this->joinRoom($roomid, $players);
                 if(!$rj) {
-                    foreach($players as $p) {
-                        $player = $this->getServer()->getPlayerExact($p);
-                        if($player) {
-                            $player->sendMessage(TF::YELLOW."匹配房间时出现错误!");
-                        }
-                    }
-                    $this->getLogger()->warning("ID:{$roomid},创建房间时出现错误!");
                     return false;
                 }
                 return true;
             }
+        }
+        foreach($this->Sessions as $Session) {
+            if($Session instanceof PTWSession) {
+                $result = $this->joinRoom($Session->getRoomId(), $players);
+                if(!$result) {
+                    continue;
+                }
+            }
+            continue;
+        }
+        $room = $this->randRoom();
+        if($room instanceof Config) {
+            $rc = $this->createRoom($roomid, $room->get('levelname'), $room->get('waitinglocation'), $room->get('playinglocation'), $room->get('settings'));
+            if(!$rc) {
+                return false;
+            }
+            $rj = $this->joinRoom($roomid, $players);
+            if(!$rj) {
+                return false;
+            }
+            return true;
         }
     }
 
