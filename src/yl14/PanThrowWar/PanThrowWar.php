@@ -54,12 +54,17 @@ class PanThrowWar extends PluginBase {
         $this->getLogger()->notice(TF::GREEN."初始化成功!");
     }
 
-    public function SearchRoom(Array $filter = [], Array $players) : bool { 
-        /**
-         * 寻找可用的房间
-         * 一切的入口
-         * 未来filter会允许选择地图
-         */
+    /**
+     * 寻找可用的房间
+     * 一切的入口
+     * 未来filter会允许选择地图
+     *
+     * @param string[] $filter
+     * @param Player[] $players
+     *
+     * @return bool
+     */
+    public function SearchRoom(Array $filter = [], Array $players) : bool {
         if(isset($filter['maxplayer'])) {
             //先循环一下所有Session看看有没有可用的
             foreach($this->Sessions as $Session) {
@@ -179,12 +184,17 @@ class PanThrowWar extends PluginBase {
         return false;
     }
 
+    /**
+     * filter:
+     *  maxplayer
+     *  mapname (WIP)
+     *
+     * @param string[] $filter
+     *
+     * return Config
+     *
+     */
     private function randRoom($filter = []) : ?Config {
-        /**
-         * filter:
-         *  maxplayer
-         *  mapname (WIP)
-         */
         if(isset($filter['maxplayer'])) {
             $roomdir = $this->getDataFolder()."rooms";
             if(is_dir($roomdir)) {
