@@ -54,12 +54,12 @@ class PanThrowWar extends PluginBase {
         $this->getLogger()->notice(TF::GREEN."初始化成功!");
     }
 
+    /**
+     * @param Array $filter
+     * @param pocketmine\Player[] $players
+     * @return bool
+     */
     public function SearchRoom(Array $filter = [], Array $players) : bool { 
-        /**
-         * 寻找可用的房间
-         * 一切的入口
-         * 未来filter会允许选择地图
-         */
         if(isset($filter['maxplayer'])) {
             //先循环一下所有Session看看有没有可用的
             foreach($this->Sessions as $Session) {
@@ -114,6 +114,11 @@ class PanThrowWar extends PluginBase {
         }
     }
 
+    /**
+     * @param int $roomid
+     * @param pocketmine\Players[] $players
+     * @return bool
+     */
     private function joinRoom(int $roomid, Array $players) : bool {
         $room = $this->getRoomById($roomid);
         if($room instanceof PTWSession) {
@@ -143,10 +148,27 @@ class PanThrowWar extends PluginBase {
         return false;
     }
 
+    /**
+     * @param int $roomid
+     * @param pocketmine\Player[] $players
+     * @param int $reason
+     * @return bool
+     */
     private function leaveRoom(int $roomid, Array $players, int $reason = 0) : bool {
-        //TODO
+        $room = $this->getRoomById($roomid);
+        if($room instanceof PTWSession) {
+            //TODO
+        }
     }
 
+    /**
+     * @param int $roomid
+     * @param String $levelname
+     * @param Array $waitinglocation
+     * @param Array $playinglocation
+     * @param Array $settings
+     * @return bool
+     */
     private function createRoom(int $roomid, String $levelname, Array $waitinglocation, Array $playinglocation, Array $settings) : bool {
         if(!isset($this->Sessions[$roomid])) {
             $this->Sessions[$roomid] = new PTWSession($this->plugin, $roomid, $levelname, $waitinglocation, $playinglocation, $settings);
@@ -162,6 +184,10 @@ class PanThrowWar extends PluginBase {
         return false;
     }
 
+    /**
+     * @param int $roomid
+     * @return bool|PTWSession
+     */
     private function getRoomById(int $roomid) : ?PTWSession {
         if(isset($this->Sessions[$roomid])) {
             if($this->Sessions[$roomid] instanceof PTWSession) {
@@ -172,6 +198,10 @@ class PanThrowWar extends PluginBase {
         return false;
     }
 
+    /**
+     * @param pocketmine\Player $player
+     * @return bool
+     */
     public function isPlayerInGame(Player $player) : bool {
         if(isset($this->InGame[$player->getName()])) {
             return true;
@@ -179,7 +209,10 @@ class PanThrowWar extends PluginBase {
         return false;
     }
 
-    private function randRoom($filter = []) : ?Config {
+    /**
+     * @param Array $filter
+     */
+    private function randRoom(Array $filter = []) : ?Config {
         /**
          * filter:
          *  maxplayer
@@ -349,6 +382,10 @@ class PanThrowWar extends PluginBase {
         }
     }
 
+    /**
+     * @param int $digit
+     * @return int
+     */
     private function randnum(int $digit) : int {
         $id = null;
         for($i = 0;$i < $digit;$i++) {
