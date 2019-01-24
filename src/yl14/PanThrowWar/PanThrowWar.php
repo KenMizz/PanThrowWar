@@ -10,6 +10,7 @@ use pocketmine\Player;
 use pocketmine\level\Position;
 
 use yl13\GameCoreAPI\GameCoreAPI as GCAPI;
+use yl13\GameWizard\GameWizard as GW;
 
 class PanThrowWar extends PluginBase {
 
@@ -151,13 +152,29 @@ class PanThrowWar extends PluginBase {
     /**
      * @param int $roomid
      * @param pocketmine\Player[] $players
-     * @param int $reason
-     * @return bool
+     * @param int $reason //0 = normal quit, 1 = offline 2 = die
      */
-    private function leaveRoom(int $roomid, Array $players, int $reason = 0) : bool {
+    private function leaveRoom(int $roomid, Array $players, int $reason = 0) {
         $room = $this->getRoomById($roomid);
         if($room instanceof PTWSession) {
-            //TODO
+            switch($reason) {
+
+                case 0:
+                    GCAPI::getInstance()->api->getChatChannelAPI()->removePlayer($this->gameid, (String)$roomid, $players);
+                    foreach($players as $p) {
+                        if($p instanceof Player) {
+                            if($room->isSpectator($p)) {
+                                $room->removeSpectator($p);
+                            } else {
+                                $room->removePlayer($p);
+                            }
+                            GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW.$p->getName().TF::WHITE."离开了游戏");
+                            $p->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
+                            GW::GiveCompass($p); //TODO
+                        }
+                    }
+                break;
+            }
         }
     }
 
@@ -376,10 +393,10 @@ class PanThrowWar extends PluginBase {
                 }
                 $c = new Config($this->getDataFolder()."configs/{$name}.yml", Config::YAML);
                 $c->reload();
-                $sender->sendMessage($this->prefix."房间配置文件{$name}重新载入成功");
-                return true;
-            break;
-        }
+                    $sender->sendMessage($this->prefix."房间配置文件{$name}重新载入成功");
+                    return true;
+                break;
+            }
     }
 
     /**
