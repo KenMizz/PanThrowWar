@@ -108,6 +108,7 @@ class PTWSession {
 
     /**
      * @param pocketmine\Player $player
+     * 
      * @return bool
      */
     public function removePlayer(Player $player) : bool {
@@ -120,6 +121,7 @@ class PTWSession {
 
     /**
      * @param pocketmine\Player $player
+     * 
      * @return pocketmine\Player|bool
      */
     public function getPlayer(Player $player) : ?Player {
@@ -130,7 +132,15 @@ class PTWSession {
     }
 
     /**
+     * @return pocketmine\Player[]
+     */
+    public function getPlayers() : Array {
+        return $this->players;
+    }
+
+    /**
      * @param pocketmine\Player $player
+     * 
      * @return bool
      */
     public function addSpectator(Player $player) : bool {
@@ -146,6 +156,7 @@ class PTWSession {
 
     /**
      * @param pocketmine\Player $player
+     * 
      * @return bool
      */
     public function removeSpectator(Player $player) : bool {
@@ -158,6 +169,7 @@ class PTWSession {
 
     /**
      * @param pocketmine\Player $player
+     * 
      * @return bool
      */
     public function isSpectator(Player $player) : bool {
@@ -165,5 +177,25 @@ class PTWSession {
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatus() : int {
+        return $this->status;
+    }
+
+    /**
+     * @param int $status
+     * 
+     * @return bool
+     */
+    public function setStatus(int $status) : bool {
+        if($status != 0 or $status !=1 or $status != 2) {
+            return false;
+        }
+        $this->status = $status;
+        return true;
     }
 }

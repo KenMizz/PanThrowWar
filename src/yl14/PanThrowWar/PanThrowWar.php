@@ -58,6 +58,7 @@ class PanThrowWar extends PluginBase {
     /**
      * @param Array $filter
      * @param pocketmine\Player[] $players
+     * 
      * @return bool
      */
     public function SearchRoom(Array $filter = [], Array $players) : bool { 
@@ -118,6 +119,7 @@ class PanThrowWar extends PluginBase {
     /**
      * @param int $roomid
      * @param pocketmine\Players[] $players
+     * 
      * @return bool
      */
     private function joinRoom(int $roomid, Array $players) : bool {
@@ -125,7 +127,7 @@ class PanThrowWar extends PluginBase {
         if($room instanceof PTWSession) {
             $Status = $room->getStatus();
             if($Status == 0 or $Status == 1) { //可以进入的状态
-                $leftplayers = count($room->getMaxPlayer()) - count($room->getPlayers());
+                $leftplayers = count($room->getMaxPlayer()) - count($room->getPlayers()); //算出剩下可允许的玩家人数
                 if(!$leftplayers - count($players) < 0) { //防止超过可进的玩家限制从而导致插件错误
                     foreach($players as $p) {
                         if($p instanceof Player) {
@@ -147,6 +149,25 @@ class PanThrowWar extends PluginBase {
             return false;
         }
         return false;
+    }
+
+    /**
+     * @param int $roomid
+     * 
+     * @return bool
+     */
+    public function removeRoom(int $roomid) : bool {
+        $room = $this->getRoomById($roomid);
+        if($room instanceof PTWSession) {
+            $players = $room->getPlayers();
+            GCAPI::getInstance()->api->getChatChannelAPI()->remove($this->gameid, (String)$roomid);
+            foreach($players as $p) {
+                if($p instanceof Player) {
+                    $room->removePlayer($p);
+                    //TODO
+                }
+            }
+        }
     }
 
     /**
@@ -174,6 +195,20 @@ class PanThrowWar extends PluginBase {
 
     /**
      * @param int $roomid
+     * @param yl14\PanThrowWar\PTWSession $session
+     * 
+     * @return bool
+     */
+    public function updateSession(int $roomid, PTWSession $session) : bool {
+        if(isset($this->Sessions[$roomid])) {
+            $this->Sessions[$roomid] = $session;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param int $roomid
      * @param String $levelname
      * @param Array $waitinglocation
      * @param Array $playinglocation
@@ -183,6 +218,7 @@ class PanThrowWar extends PluginBase {
     private function createRoom(int $roomid, String $levelname, Array $waitinglocation, Array $playinglocation, Array $settings) : bool {
         if(!isset($this->Sessions[$roomid])) {
             $this->Sessions[$roomid] = new PTWSession($this->plugin, $roomid, $levelname, $waitinglocation, $playinglocation, $settings);
+            $this->getScheduler()->scheduleRepeatingTask(new SessionTask($this, $roomid), 20);
             GCAPI::getInstance()->api->getChatChannelAPI()->create($this->gameid, (String)$roomid);
             if(!$this->getServer()->getLevelByName($levelname)) {
                 $result = GCAPI::getInstance()->api->getMapLoaderAPI()->create($this->gameid, $levelname);
@@ -211,17 +247,20 @@ class PanThrowWar extends PluginBase {
 
     /**
      * @param pocketmine\Player $player
-     * @return bool
+     * 
+     * @return int|bool
      */
-    public function isPlayerInGame(Player $player) : bool {
+    public function getPlayerInGame(Player $player) : ?int {
         if(isset($this->InGame[$player->getName()])) {
-            return true;
+            return $this->InGame[$player->getName()];
         }
         return false;
     }
 
     /**
      * @param Array $filter
+     * 
+     * @return pocketmine\utils\Config|bool
      */
     private function randRoom(Array $filter = []) : ?Config {
         /**
