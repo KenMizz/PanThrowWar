@@ -152,7 +152,7 @@ class PanThrowWar extends PluginBase {
     /**
      * @param int $roomid
      * @param pocketmine\Player[] $players
-     * @param int $reason //0 = normal quit, 1 = offline 2 = die
+     * @param int $reason //0 = normal quit|offline, 1 = 
      */
     private function leaveRoom(int $roomid, Array $players, int $reason = 0) {
         $room = $this->getRoomById($roomid);
@@ -170,10 +170,13 @@ class PanThrowWar extends PluginBase {
                             }
                             GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW.$p->getName().TF::WHITE."离开了游戏");
                             $p->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
-                            GW::GiveCompass($p); //TODO
+                            GW::GiveCompass($p);
                         }
                     }
                 break;
+
+                case 1:
+                    
             }
         }
     }
