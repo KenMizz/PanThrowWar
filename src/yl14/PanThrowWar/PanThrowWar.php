@@ -21,7 +21,7 @@ class PanThrowWar extends PluginBase {
     private $InGame = [];
 
     private $onset = [];
-    public $prefix = TF::WHITE."[".TF::GREEN."丢锅大战".TF::WHITE."]";
+    private $prefix = TF::WHITE."[".TF::GREEN."丢锅大战".TF::WHITE."]";
 
     private static $instance;
 
@@ -151,32 +151,23 @@ class PanThrowWar extends PluginBase {
 
     /**
      * @param int $roomid
-     * @param pocketmine\Player[] $players
-     * @param int $reason //0 = normal quit|offline, 1 = 
+     * @param Array $players
      */
-    private function leaveRoom(int $roomid, Array $players, int $reason = 0) {
+    private function leaveRoom(int $roomid, Array $players) {
         $room = $this->getRoomById($roomid);
         if($room instanceof PTWSession) {
-            switch($reason) {
-
-                case 0:
-                    GCAPI::getInstance()->api->getChatChannelAPI()->removePlayer($this->gameid, (String)$roomid, $players);
-                    foreach($players as $p) {
-                        if($p instanceof Player) {
-                            if($room->isSpectator($p)) {
-                                $room->removeSpectator($p);
-                            } else {
-                                $room->removePlayer($p);
-                            }
-                            GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW.$p->getName().TF::WHITE."离开了游戏");
-                            $p->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
-                            GW::GiveCompass($p);
-                        }
+            foreach($players as $p) {
+                if($p instanceof Player) {
+                    if($room->getPlayer($p) instanceof Player) {
+                        $room->removePlayer($p);
+                        GCAPI::getInstance()->api->getChatChannelAPI()->removePlayer($this->gameid, (String)$roomid, array($p));
+                        GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW.$p->getName().TF::WHITE."退出了游戏");
+                        GW::GiveCompass($p);
+                        $p->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
                     }
-                break;
-
-                case 1:
-                    
+                    continue;
+                }
+                continue;
             }
         }
     }
