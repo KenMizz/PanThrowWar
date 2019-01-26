@@ -164,10 +164,14 @@ class PanThrowWar extends PluginBase {
             foreach($players as $p) {
                 if($p instanceof Player) {
                     $room->removePlayer($p);
-                    //TODO
+                    GW::GiveCompass($p);
+                    $p->teleport($this->getServer()->getLevelManager()->getDefaultLevel()->getSafeSpawn());
                 }
             }
+            unset($this->Sessions[$roomid]);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -184,7 +188,7 @@ class PanThrowWar extends PluginBase {
                         GCAPI::getInstance()->api->getChatChannelAPI()->removePlayer($this->gameid, (String)$roomid, array($p));
                         GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW.$p->getName().TF::WHITE."退出了游戏");
                         GW::GiveCompass($p);
-                        $p->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
+                        $p->teleport($this->getServer()->getLevelManager()->getDefaultLevel()->getSafeSpawn());
                     }
                     continue;
                 }
