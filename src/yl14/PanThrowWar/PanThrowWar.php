@@ -136,7 +136,7 @@ class PanThrowWar extends PluginBase {
                                 GCAPI::getInstance()->api->getChatChannelAPI()->addPlayer($this->gameid, (String)$roomid, $players);
                                 GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW."{$p->getName()}".TF::WHITE."加入了房间");
                                 $waitinglocation = $room->getWaitingLocation();
-                                $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelByName($room->getLevelName())));
+                                $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelManager()->getLevelByName($room->getLevelName())));
                             }
                             continue;
                         }
@@ -224,10 +224,12 @@ class PanThrowWar extends PluginBase {
             $this->Sessions[$roomid] = new PTWSession($this->plugin, $roomid, $levelname, $waitinglocation, $playinglocation, $settings);
             $this->getScheduler()->scheduleRepeatingTask(new SessionTask($this, $roomid), 20);
             GCAPI::getInstance()->api->getChatChannelAPI()->create($this->gameid, (String)$roomid);
-            if(!$this->getServer()->getLevelByName($levelname)) {
+            if(!$this->getServer()->getLevelManager()->getLevelByName($levelname)) {
                 $result = GCAPI::getInstance()->api->getMapLoaderAPI()->create($this->gameid, $levelname);
                 if(!$result) {
                     $this->getLogger()->warning("在ID为".TF::WHITE.$roomid.TF::YELLOW."的Session下的地图加载错误!玩家如果加入可能会导致问题!");
+                } else {
+                    $this->getServer()->getLevelManager()->getLevelByName($levelname)->setDifficulty(1);
                 }
             }
             return true;
