@@ -139,6 +139,13 @@ class PTWSession {
     }
 
     /**
+     * @return pocketmine\Player[]
+     */
+    public function getSpectators() : Array {
+        return $this->spectators;
+    }
+
+    /**
      * @param pocketmine\Player $player
      * 
      * @return bool

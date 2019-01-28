@@ -241,7 +241,7 @@ class PanThrowWar extends PluginBase {
      * @param int $roomid
      * @return bool|PTWSession
      */
-    private function getRoomById(int $roomid) : ?PTWSession {
+    public function getRoomById(int $roomid) : ?PTWSession {
         if(isset($this->Sessions[$roomid])) {
             if($this->Sessions[$roomid] instanceof PTWSession) {
                 return $this->Sessions[$roomid];
