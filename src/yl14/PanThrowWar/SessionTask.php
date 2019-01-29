@@ -7,9 +7,9 @@ namespace yl14\PanThrowWar;
 use pocketmine\scheduler\Task;
 use pocketmine\item\Item;
 use pocketmine\Player;
-use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\utils\TextFormat as TF;
+use pocketmine\entity\Effect;
 
 class SessionTask extends Task {
 
@@ -61,8 +61,8 @@ class SessionTask extends Task {
                     if($this->countdown == 0) {
                         $Session->setStatus(2);
                         $this->plugin->updateSession($this->roomid, $Session);
-                        $this->plugin->getServer()->broadcastTip(TF::YELLOW."游戏开始咯!", $Session->getPlayers());
-                        $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅");
+                        $this->plugin->getServer()->broadcastTi-p(TF::YELLOW."游戏开始咯!", $Session->getPlayers());
+                        $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
                     }
                     if(count($Session->getPlayers() <= 0)) {
                         $this->plugin->getScheduler()->cancelTask($this->getTaskId());
@@ -72,10 +72,10 @@ class SessionTask extends Task {
 
                 case 2:
                     $this->gametime--;
-                    $this->waittime--;
-                    if($this->waittime == 0) {
-                        $this->waittime = 5;
-                        if($this->onSwitching) {
+                    if($this->onSwitching) {
+                        $this->waittime--;
+                        if($this->waittime == 0) {
+                            $this->waittime = 5;
                             $this->explodetime = $Session->getExplodeTime();
                             $this->onSwitching = false;
                             $players = $Session->getPlayers();
@@ -90,25 +90,56 @@ class SessionTask extends Task {
                                     break;
                                 }
                             }
-                        } else {
-                            $this->explodetime--;
+                        }
+                    } else {
+                        $this->explodetime--;
+                        if($this->explodetime == 30) {
+                            $this->plugin->getServer()->broadcastMessage($this->plugin->prefix.TF::YELLOW."锅子还有".TF::WHITE.$this->explodetime."秒后爆炸", $Session->getPlayers()); 
+                        }
+                        if($this->explodetime == 10) {
+                            $this->plugin->getServer()->broadcastMessage($this->plugin->prefix.TF::YELLOW."锅子还有".TF::WHITE.$this->explodetime."秒后爆炸", $Session->getPlayers()); 
+                        }
+                        if($this->explodetime <= 5 and $this->explodetime != 0) {
+                            $this->plugin->getServer()->broadcastTip((String)$this->explodetime, $Session->getPlayers()); 
+                        }
+                        if($this->explodetime == 0) {
+                            //boom
+                            $this->explodetime = $Session->getExplodeTime();
+                            foreach($Session->getPlayers() as $p) {
+                                if($p instanceof Player) {
+                                    if($p->getArmorInventory()->getHelmet() == Item::get(Item::MOB_HEAD, 4)) {
+                                        //锅子携带者
+                                        $p->getArmorInventory()->setHelmet(Item::get(Item::AIR));
+                                        $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$p->getName()}因背锅而被炸死了...", $Session->getPlayers());
+                                        $p->addTitle(TF::GOLD."你已进入观察者模式", TF::RED."通过点击背包内红色羊毛即可离开游戏");
+                                        $this->toSpectator($p);
+                                        $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
+                                        $this->onSwitching = true;
+                                    }
+                                }
+                            }
                         }
                     }
-                    
+                    if(count($Session->getPlayers()) == 1) {
+                            //TODO
+                    }
             }
         }
     }
 
     /**
-     * @param int $roomid
      * @param pocketmine\Player $player
      */
-    private function toSpectator(int $roomid, Player $player) {
-        $room = $this->plugin->getRoomById($roomid);
+    private function toSpectator(Player $player) {
+        $room = $this->plugin->getRoomById($this->roomid);
         if($room instanceof PTWSession) {
             $player->removeEffect(Effect::SPEED);
             $player->addEffect(new EffectInstance(Effect::getEffect(Effect::INVISIBILITY), 20 * 90, 1, true, false));
             $player->setGamemode(1);
+            $player->getInventory()->clearAll();
+            $wool = Item::get(Item::WOOL, 14);
+            $wool->setCustomName("离开游戏");
+            $player->getInventory()->addItem($wool);
             $room->addSpectator($player);
         }
     }
