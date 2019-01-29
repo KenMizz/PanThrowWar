@@ -3,29 +3,71 @@
 namespace yl14\PanThrowWar;
 
 use pocketmine\event\{
-    Listener, player\PlayerJoinEvent, player\PlayerQuitEvent, player\PlayerDeathEvent, player\PlayerDropItemEvent, entity\EntityArmorChangeEvent, block\BlockBreakEvent, block\BlockPlaceEvent
+    Listener, player\PlayerQuitEvent, player\PlayerDropItemEvent, player\PlayerItemHeldEvent, entity\EntityArmorChangeEvent, block\BlockBreakEvent, block\BlockPlaceEvent
 };
+use pocketmine\item\Item;
+use pocketmine\Player;
 
 class EventListener implements Listener {
 
-    private $plugin;
+	private $plugin;
+	
+	private $onQuit = [];
 
     public function __construct(PanThrowWar $plugin) {
         $this->plugin = $plugin;
-    }
+	}
+
+	public function onDropItem(PlayerDropItemEvent $ev) {
+		$player = $ev->getPlayer();
+		if($this->plugin->getPlayerInGame($player)) {
+			$ev->setCancelled();
+		}
+	}
 	
-	//事件调用例子
-	public function onPlayerDeath(PlayerDeathEvent $ev) {
-		$name = $ev->getPlayer()->getName();
-		if(isset($this->plugin->InGame[$name])) {
-			if(isset($this->plugin->Sessions[$this->plugin->InGame[$name]])) {
-				$session = $this->plugin->Sessions[$this->plugin->InGame[$name]];
-				if($session->existPlayer($name)) {
-					$session->onEventListener($ev);
+	public function onPlayerQuit(PlayerQuitEvent $ev) {
+		$player = $ev->getPlayer();
+		if($this->plugin->getPlayerInGame($player)) {
+			$this->plugin->leaveRoom($this->plugin->getPlayerInGame($player), [$player]);
+		}
+	}
+
+	public function onPlayerItemHeld(PlayerItemHeldEvent $ev) {
+		$player = $ev->getPlayer();
+		if($this->plugin->getPlayerInGame($player)) {
+			if($ev->getItem() == Item::get(Item::WOOL, 14) and $ev->getItem()->getCustomName() == TF::RED."退出房间") {
+				if(!isset($this->onQuit[$player->getName()])) {
+					$ev->setCancelled();
+					$this->onQuit[$player->getName()] = 1;
+					$player->sendTip("再点一次即可退出游戏");
+				} else {
+					unset($this->onQuit[$player->getName()]);
+					$this->plugin->leaveRoom($this->getPlayerInGame($player), [$player]);
 				}
 			}
 		}
 	}
 
-    
+	public function onEntityArmorChange(EntityArmorChangeEvent $ev) {
+		$entity = $ev->getEntity();
+		if($entity instanceof Player) {
+			if($this->plugin->getPlayerInGame($entity)) {
+				$ev->setCancelled();
+			}
+		}
+	}
+
+	public function onBlockBreak(BlockBreakEvent $ev) {
+		$player = $ev->getPlayer();
+		if($this->plugin->getPlayerInGame($player)) {
+			$ev->setCancelled();
+		}
+	}
+
+	public function onBlockPlace(BlockPlaceEvent $ev) {
+		$player = $ev->getPlayer();
+		if($this->plugin->getPlayerInGame($player)) {
+			$ev->setCancelled();
+		}
+	}
 }

@@ -60,8 +60,13 @@ class SessionTask extends Task {
                     $this->plugin->getServer()->broadcastTitle($this->countdown, "", -1, -1, -1, $Session->getPlayers());
                     if($this->countdown == 0) {
                         $Session->setStatus(2);
+                        foreach($Session->getPlayers() as $p) {
+                            if($p instanceof Player) {
+                                $p->getInventory()->clearAll();
+                            }
+                        }
                         $this->plugin->updateSession($this->roomid, $Session);
-                        $this->plugin->getServer()->broadcastTi-p(TF::YELLOW."游戏开始咯!", $Session->getPlayers());
+                        $this->plugin->getServer()->broadcastTip(TF::YELLOW."游戏开始咯!", $Session->getPlayers());
                         $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
                     }
                     if(count($Session->getPlayers() <= 0)) {
@@ -111,7 +116,7 @@ class SessionTask extends Task {
                                         //锅子携带者
                                         $p->getArmorInventory()->setHelmet(Item::get(Item::AIR));
                                         $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$p->getName()}因背锅而被炸死了...", $Session->getPlayers());
-                                        $p->addTitle(TF::GOLD."你已进入观察者模式", TF::RED."通过点击背包内红色羊毛即可离开游戏");
+                                        $p->addTitle(TF::GOLD."你已进入观察者模式", TF::RED."通过点击物品栏内红色羊毛即可离开游戏");
                                         $this->toSpectator($p);
                                         $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
                                         $this->onSwitching = true;
@@ -146,7 +151,7 @@ class SessionTask extends Task {
             $player->setGamemode(1);
             $player->getInventory()->clearAll();
             $wool = Item::get(Item::WOOL, 14);
-            $wool->setCustomName("离开游戏");
+            $wool->setCustomName(TF::RED."离开房间");
             $player->getInventory()->addItem($wool);
             $room->addSpectator($player);
         }

@@ -8,6 +8,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\{TextFormat as TF, Config};
 use pocketmine\Player;
 use pocketmine\level\Position;
+use pocketmine\item\Item;
 
 use yl13\GameCoreAPI\GameCoreAPI as GCAPI;
 use yl13\GameWizard\GameWizard as GW;
@@ -139,6 +140,9 @@ class PanThrowWar extends PluginBase {
                                 GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW."{$p->getName()}".TF::WHITE."加入了房间");
                                 $waitinglocation = $room->getWaitingLocation();
                                 $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelManager()->getLevelByName($room->getLevelName())));
+                                $wool = Item::get(Item::WOOL, 14);
+                                $wool->setCustomName(TF::RED."退出房间");
+                                $p->getInventory()->addItem($wool);
                             }
                             continue;
                         }
@@ -162,14 +166,8 @@ class PanThrowWar extends PluginBase {
         $room = $this->getRoomById($roomid);
         if($room instanceof PTWSession) {
             $players = $room->getPlayers();
+            $this->leaveRoom($roomid, $players);
             GCAPI::getInstance()->api->getChatChannelAPI()->remove($this->gameid, (String)$roomid);
-            foreach($players as $p) {
-                if($p instanceof Player) {
-                    $room->removePlayer($p);
-                    GW::GiveCompass($p);
-                    $p->teleport($this->getServer()->getLevelManager()->getDefaultLevel()->getSafeSpawn());
-                }
-            }
             unset($this->Sessions[$roomid]);
             return true;
         }
@@ -186,15 +184,17 @@ class PanThrowWar extends PluginBase {
             foreach($players as $p) {
                 if($p instanceof Player) {
                     if($room->getPlayer($p) instanceof Player) {
+                        unset($this->InGame[$p->getName()]);
                         $room->removePlayer($p);
                         GCAPI::getInstance()->api->getChatChannelAPI()->removePlayer($this->gameid, (String)$roomid, array($p));
-                        GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW.$p->getName().TF::WHITE."退出了游戏");
+                        GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (String)$roomid, TF::YELLOW.$p->getName().TF::WHITE."退出了房间");
+                        $p->getInventory()->clearAll();
+                        $p->getArmorInventory()->clearAll();
+                        $p->removeAllEffects();
                         GW::GiveCompass($p);
                         $p->teleport($this->getServer()->getLevelManager()->getDefaultLevel()->getSafeSpawn());
                     }
-                    continue;
                 }
-                continue;
             }
         }
     }
