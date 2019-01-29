@@ -9,7 +9,7 @@ use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
-use pocketmine\utils\Color;
+use pocketmine\utils\TextFormat as TF;
 
 class SessionTask extends Task {
 
@@ -21,6 +21,7 @@ class SessionTask extends Task {
 
     private $countdown = 10;
     private $onexplode = true;
+    private $onSwitching = true;
     private $waittime = 5;
     
     public function __construct(PanThrowWar $plugin, int $roomid) {
@@ -74,19 +75,26 @@ class SessionTask extends Task {
                     $this->waittime--;
                     if($this->waittime == 0) {
                         $this->waittime = 5;
-                        if($this->onexplode) {
-                            foreach($Session->getPlayers() as $p) {
+                        if($this->onSwitching) {
+                            $this->explodetime = $Session->getExplodeTime();
+                            $this->onSwitching = false;
+                            $players = $Session->getPlayers();
+                            shuffle($players);
+                            foreach($players as $p) {
                                 if($p instanceof Player) {
-                                    if($p->getArmorInventory()->getHelmet() == Item::get(Item::MOB_HEAD, 4)) { //锅子携带者
-                                        $p->getArmorInventory()->setHelmet(Item::get(Item::AIR));
-                                        $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$p->getName()}因背锅而死", $Session->getPlayers());
-                                        $p->addTitle(TF::YELLOW."你已进入观察者模式", TF::RED."利用红色羊毛点击某个方块即可退出游戏");
-                                        $this->toSpectator($p);
-                                    }    
+                                    $p->getArmorInventory()->setHelmet(Item::get(Item::AIR));
+                                    $p->getArmorInventory()->setHelmet(Item::get(Item::MOB_HEAD, 4));
+                                    $p->addEffect(new EffectInstance(Effect::getEffect(Effect::SPEED), 20 * 90, 1, true, false));
+                                    $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."恭喜".$p->getName()."成功背锅!");
+                                    $this->plugin->getServer()->broadcastMessage($this->plugin->prefix.TF::YELLOW."锅子还有".TF::WHITE.$Session->getExplodeTime().TF::YELLOW."秒后爆炸");
+                                    break;
                                 }
                             }
+                        } else {
+                            $this->explodetime--;
                         }
                     }
+                    
             }
         }
     }
