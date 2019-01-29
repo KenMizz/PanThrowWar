@@ -15,10 +15,12 @@ use yl13\GameWizard\GameWizard as GW;
 class PanThrowWar extends PluginBase {
 
     const VERSION = '1.0.0';
+	
+	public $Sessions = [];
+	
+	public $InGame = [];
+	
     private $gameid;
-
-    private $Sessions = [];
-    private $InGame = [];
 
     private $onset = [];
     private $prefix = TF::WHITE."[".TF::GREEN."丢锅大战".TF::WHITE."]";

@@ -6,6 +6,7 @@ namespace yl14\PanThrowWar;
 
 use pocketmine\Player;
 
+
 class PTWSession {
 
     private $status = 0; //0 = waiting, 1 = ready, 2 = started
@@ -105,6 +106,7 @@ class PTWSession {
         }
         return false;
     }
+	
 
     /**
      * @param pocketmine\Player $player
@@ -130,6 +132,15 @@ class PTWSession {
         }
         return false;
     }
+	
+	/**
+     * @param string $name
+     * 
+     * @return bool
+     */
+	public function existPlayer(String $name) {
+		return isset($this->players[$name]);
+	}
 
     /**
      * @return pocketmine\Player[]
@@ -205,4 +216,15 @@ class PTWSession {
         $this->status = $status;
         return true;
     }
+	
+	public function onEventListener($ev) {
+		switch(get_class($ev)) {
+			case "PlayerDeathEvent":
+				//pass
+			break;
+				default:
+					//pass
+				break;
+		}
+	}
 }
