@@ -116,7 +116,7 @@ class SessionTask extends Task {
                                         //锅子携带者
                                         $p->getArmorInventory()->setHelmet(Item::get(Item::AIR));
                                         $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$p->getName()}因背锅而被炸死了...", $Session->getPlayers());
-                                        $p->addTitle(TF::GOLD."你已进入观察者模式", TF::RED."通过点击物品栏内红色羊毛即可离开游戏");
+                                        $p->addTitle(TF::GOLD."你已进入观察者模式", TF::RED."通过点击物品栏内红色羊毛即可离开房间");
                                         $this->toSpectator($p);
                                         $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
                                         $this->onSwitching = true;
