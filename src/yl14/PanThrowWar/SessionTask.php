@@ -121,7 +121,15 @@ class SessionTask extends Task {
                         }
                     }
                     if(count($Session->getPlayers()) == 1) {
-                            //TODO
+                        foreach($Session->getPlayers() as $p) {
+                            $p->sendMessage(TF::YELLOW."你赢了!");
+                            $this->plugin->getScheduler()->cancelTask($this->getTaskId());
+                            $this->plugin->removeRoom($this->roomid);
+                        }
+                    }
+                    if(count($Session->getPlayers() <= 0)) {
+                        $this->plugin->getScheduler()->cancelTask($this->getTaskId());
+                        $this->plugin->removeRoom($this->roomid);
                     }
             }
         }
