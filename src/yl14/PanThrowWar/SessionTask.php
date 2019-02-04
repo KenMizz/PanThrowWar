@@ -10,6 +10,7 @@ use pocketmine\Player;
 use pocketmine\entity\EffectInstance;
 use pocketmine\utils\TextFormat as TF;
 use pocketmine\entity\Effect;
+use pocketmine\level\Position;
 
 class SessionTask extends Task {
 
@@ -66,6 +67,10 @@ class SessionTask extends Task {
                             }
                         }
                         $this->plugin->updateSession($this->roomid, $Session);
+                        $playinglocation = $Session->getPlayingLocation();
+                        foreach($Session->getPlayers() as $p) {
+                            $p->teleport(new Position($playinglocation['x'], $playinglocation['y'], $playinglocation['z']));
+                        }
                         $this->plugin->getServer()->broadcastTip(TF::YELLOW."游戏开始咯!", $Session->getPlayers());
                         $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
                     }

@@ -6,6 +6,7 @@ namespace yl14\PanThrowWar;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\{TextFormat as TF, Config};
+use pocketmine\command\{CommandSender, Command};
 use pocketmine\Player;
 use pocketmine\level\Position;
 use pocketmine\item\Item;
@@ -17,9 +18,9 @@ class PanThrowWar extends PluginBase {
 
     const VERSION = '1.0.0';
 	
-	public $Sessions = [];
+	private $Sessions = [];
 	
-	public $InGame = [];
+	private $InGame = [];
 	
     private $gameid;
 
@@ -258,7 +259,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return int|bool
      */
-    public function getPlayerInGame(Player $player) : ?int {
+    public function getPlayerInGame(Player $player) : ?bool {
         if(isset($this->InGame[$player->getName()])) {
             return $this->InGame[$player->getName()];
         }
@@ -331,113 +332,117 @@ class PanThrowWar extends PluginBase {
         return false;
     }
 
-    public function onCommand(CommandSender $sender, Command $cmd, String $label, Array $args) : bool {
+    public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args) : bool {
         $cmdname = $cmd->getName();
-        switch($cmdname) {
-
-            default:
+        if($cmdname == 'pw') {
+            if(!isset($args[0])) {
                 return false;
-            break;
+            }
+            switch($args[0]) {
+                
+                default:
+                    return false;
+                break;
 
-            case 'help':
-                $sender->sendMessage(TF::AQUA."----丢锅大战帮助----");
-                $sender->sendMessage(TF::WHITE."/pw set 房间名 设置新的房间配置文件");
-                $sender->sendMessage("/pw reload 房间名 重载指定的房间配置文件");
-                $sender->sendMessage("/pw remove 房间名 移除指定的房间配置文件");
-                return true;
-            break;
-
-            case 'set':
-                if(!isset($args[1])) {
-                    return false;
-                }
-                if(!$sender instanceof Player) {
-                    return false;
-                }
-                if(isset($this->onset[$sender->getName()])) {
-                    unset($this->onset[$sender->getName()]);
-                    $name = $this->onset[$sender->getName()]['name'];
-                    $sender->sendMessage($this->prefix.TF::RED."已取消{$name}的房间配置文件设置");
-                    return true;
-                }
-                $this->onset[$sender->getName()] = array(
-                    'name' => $args[1],
-                    'levelname' => $sender->getLevel()->getFolderName(),
-                    'waitinglocation' => array(
-                        'x' => 0,
-                        'y' => 0,
-                        'z' => 0
-                    ),
-                    'playinglocation' => array(
-                        'x' => 0,
-                        'y' => 0,
-                        'z' => 0
-                    ),
-                    'settings' => array(
-                        'maxplayer' => 4,
-                        'minplayer' => 2,
-                        'gametime' => 600, //seconds
-                        //'money' => 100,
-                        'explodetime' => 60 //seconds
-                    )
-                );
-                $sender->sendMessage($this->prefix."开始设置房间配置文件{$name}\n走到玩家等待位置输入/pw w即可设置等待位置\n走到玩家游玩位置输入/pw p即可设置游玩位置\n当一切设置完成后，输入/pw f来完成配置");
-                return true;
-            break;
-
-            case 'w':
-                if(!isset($this->onset[$sender->getName()])) {
-                    return false;
-                }
-                if(!$sender instanceof Player) {
-                    return false;
-                }
-                $this->onset[$sender->getName()]['waitinglocation'] = array(
-                    'x' => $sender->x,
-                    'y' => $sender->y,
-                    'z' => $sender->z
-                );
-                $sender->sendMessage($this->prefix."玩家等待位置设置成功");
-                return true;
-            break;
-            
-            case 'p':
-                if(!isset($this->onset[$sender->getName()])) {
-                    return false;
-                }
-                if(!$sender instanceof Player) {
-                    return false;
-                }
-                $this->onset[$sender->getName()]['playinglocation'] = array(
-                    'x' => $sender->x,
-                    'y' => $sender->y,
-                    'z' => $sender->z
-                );
-                $sender->sendMessage($this->prefix."玩家游玩位置设置成功");
-                return true;
-            break;
-
-            case 'f':
-                $name = $this->onset[$sender->getName()]['name'];
-                new Config($this->getDataFolder()."configs/{$name}.yml", Config::YAML, $this->onset[$sender->getName()]);
-                unset($this->onset[$sender->getName()]);
-                $sender->sendMessage($this->prefix."已完成房间配置文件{$name}的设置");
-                return true;
-            break;
-
-            case 'reload':
-                if(!isset($args[1])) {
-                    return false;
-                }
-                if(!is_file($this->getDataFolder()."configs/{$name}.yml")) {
-                    return false;
-                }
-                $c = new Config($this->getDataFolder()."configs/{$name}.yml", Config::YAML);
-                $c->reload();
-                    $sender->sendMessage($this->prefix."房间配置文件{$name}重新载入成功");
+                case 'help':
+                    $sender->sendMessage(TF::AQUA."----丢锅大战帮助----");
+                    $sender->sendMessage(TF::WHITE."/pw set 房间名 设置新的房间配置文件");
+                    $sender->sendMessage("/pw reload 房间名 重载指定的房间配置文件");
+                    $sender->sendMessage("/pw remove 房间名 移除指定的房间配置文件");
                     return true;
                 break;
+
+                case 'set':
+                    if(!isset($args[1])) {
+                        return false;
+                    }
+                    if(!$sender instanceof Player) {
+                        return false;
+                    }
+                    if(isset($this->onset[$sender->getName()])) {
+                        unset($this->onset[$sender->getName()]);
+                        $name = $this->onset[$sender->getName()]['name'];
+                        $sender->sendMessage($this->prefix.TF::RED."已取消{$name}的房间配置文件设置");
+                        return true;
+                    }
+                    $this->onset[$sender->getName()] = array(
+                        'name' => $args[1],
+                        'levelname' => $sender->getLevel()->getFolderName(),
+                        'waitinglocation' => array(
+                            'x' => 0,
+                            'y' => 0,
+                            'z' => 0
+                        ),
+                        'playinglocation' => array(
+                            'x' => 0,
+                            'y' => 0,
+                            'z' => 0
+                        ),
+                        'settings' => array(
+                            'maxplayer' => 4,
+                            'minplayer' => 2,
+                            'gametime' => 600, //seconds
+                            //'money' => 100,
+                            'explodetime' => 60 //seconds
+                        )
+                    );
+                    $sender->sendMessage($this->prefix."开始设置房间配置文件{$name}\n走到玩家等待位置输入/pw w即可设置等待位置\n走到玩家游玩位置输入/pw p即可设置游玩位置\n当一切设置完成后，输入/pw f来完成配置");
+                    return true;
+                break;
+
+                case 'w':
+                    if(!isset($this->onset[$sender->getName()])) {
+                        return false;
+                    }
+                    if(!$sender instanceof Player) {
+                        return false;
+                    }
+                    $this->onset[$sender->getName()]['waitinglocation'] = array(
+                        'x' => $sender->x,
+                        'y' => $sender->y,
+                        'z' => $sender->z
+                    );
+                    $sender->sendMessage($this->prefix."玩家等待位置设置成功");
+                    return true;
+                break;
+                
+                case 'p':
+                    if(!isset($this->onset[$sender->getName()])) {
+                        return false;
+                    }
+                    if(!$sender instanceof Player) {
+                        return false;
+                    }
+                    $this->onset[$sender->getName()]['playinglocation'] = array(
+                        'x' => $sender->x,
+                        'y' => $sender->y,
+                        'z' => $sender->z
+                    );
+                    $sender->sendMessage($this->prefix."玩家游玩位置设置成功");
+                    return true;
+                break;
+
+                case 'f':
+                    $name = $this->onset[$sender->getName()]['name'];
+                    new Config($this->getDataFolder()."configs/{$name}.yml", Config::YAML, $this->onset[$sender->getName()]);
+                    unset($this->onset[$sender->getName()]);
+                    $sender->sendMessage($this->prefix."已完成房间配置文件{$name}的设置");
+                    return true;
+                break;
+
+                case 'reload':
+                    if(!isset($args[1])) {
+                        return false;
+                    }
+                    if(!is_file($this->getDataFolder()."configs/{$name}.yml")) {
+                        return false;
+                    }
+                    $c = new Config($this->getDataFolder()."configs/{$name}.yml", Config::YAML);
+                    $c->reload();
+                    $sender->sendMessage($this->prefix."房间配置文件{$name}重新载入成功");
+                    return true;
             }
+        }
     }
 
     /**

@@ -132,15 +132,6 @@ class PTWSession {
         }
         return false;
     }
-	
-	/**
-     * @param string $name
-     * 
-     * @return bool
-     */
-	public function existPlayer(String $name) {
-		return isset($this->players[$name]);
-	}
 
     /**
      * @return pocketmine\Player[]
@@ -216,15 +207,4 @@ class PTWSession {
         $this->status = $status;
         return true;
     }
-	
-	public function onEventListener($ev) {
-		switch(get_class($ev)) {
-			case "PlayerDeathEvent":
-				//pass
-			break;
-				default:
-					//pass
-				break;
-		}
-	}
 }
