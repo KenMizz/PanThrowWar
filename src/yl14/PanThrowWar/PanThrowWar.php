@@ -39,7 +39,7 @@ class PanThrowWar extends PluginBase {
     }
 
     public function onDisable() {
-        $this->getLoggeer()->warning("丢锅大战已关闭");
+        $this->getLogger()->warning("丢锅大战已关闭");
     }
 
     public static function getInstance() {
@@ -118,6 +118,7 @@ class PanThrowWar extends PluginBase {
             }
             return true;
         }
+        return false;
     }
 
     /**
@@ -271,7 +272,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return pocketmine\utils\Config|bool
      */
-    private function randRoom(Array $filter = []) : ?Config {
+    private function randRoom(Array $filter = []) : ?bool {
         /**
          * filter:
          *  maxplayer
