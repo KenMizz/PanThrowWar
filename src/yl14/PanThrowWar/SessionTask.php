@@ -46,10 +46,10 @@ class SessionTask extends Task {
                 case 0:
                     if(count($Session->getPlayers()) >= $Session->getMinPlayer()) {
                         $Session->setStatus(1);
-                        $this->plugin->updateSession($this->roomid, $Session);
+                        $this->plugin->updateSession($Session->getRoomId(), $Session);
                         $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."房间人数已到达最小可玩人数，进入准备状态", $Session->getPlayers());
                     }
-                    if(count($Session->getPlayers() <= 0)) {
+                    if(count($Session->getPlayers()) <= 0) {
                         $this->plugin->getScheduler()->cancelTask($this->getTaskId());
                         $this->plugin->removeRoom($this->roomid);
                     }
@@ -58,7 +58,7 @@ class SessionTask extends Task {
 
                 case 1:
                     $this->countdown--;
-                    $this->plugin->getServer()->broadcastTitle($this->countdown, "", -1, -1, -1, $Session->getPlayers());
+                    $this->plugin->getServer()->broadcastTitle((String)$this->countdown, "", -1, -1, -1, $Session->getPlayers());
                     if($this->countdown == 0) {
                         $Session->setStatus(2);
                         foreach($Session->getPlayers() as $p) {
@@ -72,9 +72,9 @@ class SessionTask extends Task {
                             $p->teleport(new Position($playinglocation['x'], $playinglocation['y'], $playinglocation['z']));
                         }
                         $this->plugin->getServer()->broadcastTip(TF::YELLOW."游戏开始咯!", $Session->getPlayers());
-                        $this->plugin->getServer()->broadcastMessage($this->plugin->preix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
+                        $this->plugin->getServer()->broadcastMessage($this->plugin->prefix.TF::YELLOW."将在5秒后抽取随机个人背锅", $Session->getPlayers());
                     }
-                    if(count($Session->getPlayers() <= 0)) {
+                    if(count($Session->getPlayers()) <= 0) {
                         $this->plugin->getScheduler()->cancelTask($this->getTaskId());
                         $this->plugin->removeRoom($this->roomid);
                     }
@@ -137,7 +137,7 @@ class SessionTask extends Task {
                             $this->plugin->removeRoom($this->roomid);
                         }
                     }
-                    if(count($Session->getPlayers() <= 0)) {
+                    if(count($Session->getPlayers()) <= 0) {
                         $this->plugin->getScheduler()->cancelTask($this->getTaskId());
                         $this->plugin->removeRoom($this->roomid);
                     }

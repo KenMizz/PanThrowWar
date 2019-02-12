@@ -3,10 +3,11 @@
 namespace yl14\PanThrowWar;
 
 use pocketmine\event\{
-    Listener, player\PlayerQuitEvent, player\PlayerDropItemEvent, player\PlayerItemHeldEvent, entity\EntityArmorChangeEvent, block\BlockBreakEvent, block\BlockPlaceEvent
+    Listener, player\PlayerQuitEvent, player\PlayerDropItemEvent, player\PlayerItemHeldEvent, entity\EntityArmorChangeEvent, block\BlockBreakEvent, block\BlockPlaceEvent, entity\EntityDamageByEntityEvent
 };
 use pocketmine\item\Item;
 use pocketmine\Player;
+use pocketmine\utils\TextFormat as TF;
 
 class EventListener implements Listener {
 
@@ -35,14 +36,14 @@ class EventListener implements Listener {
 	public function onPlayerItemHeld(PlayerItemHeldEvent $ev) {
 		$player = $ev->getPlayer();
 		if($this->plugin->getPlayerInGame($player)) {
-			if($ev->getItem() == Item::get(Item::WOOL, 14) and $ev->getItem()->getCustomName() == TF::RED."退出房间") {
+			if($ev->getItem()->getCustomName() == TF::RED."退出房间") {
 				if(!isset($this->onQuit[$player->getName()])) {
 					$ev->setCancelled();
 					$this->onQuit[$player->getName()] = 1;
 					$player->sendTip("再点一次即可退出游戏");
 				} else {
 					unset($this->onQuit[$player->getName()]);
-					$this->plugin->leaveRoom($this->getPlayerInGame($player), [$player]);
+					$this->plugin->leaveRoom($this->plugin->getPlayerInGame($player), [$player]);
 				}
 			}
 		}
@@ -69,5 +70,9 @@ class EventListener implements Listener {
 		if($this->plugin->getPlayerInGame($player)) {
 			$ev->setCancelled();
 		}
+	}
+
+	public function onEntityDamageByEntity(EntityDamageByEntityEvent $ev) {
+		//TODO
 	}
 }

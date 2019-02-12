@@ -40,7 +40,7 @@ class PTWSession {
      * @return int
      */
     public function getRoomId() : int {
-        return $roomid;
+        return $this->roomid;
     }
 
     /**
@@ -201,9 +201,6 @@ class PTWSession {
      * @return bool
      */
     public function setStatus(int $status) : bool {
-        if($status != 0 or $status !=1 or $status != 2) {
-            return false;
-        }
         $this->status = $status;
         return true;
     }
