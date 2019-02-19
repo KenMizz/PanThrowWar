@@ -73,6 +73,6 @@ class EventListener implements Listener {
 	}
 
 	public function onEntityDamageByEntity(EntityDamageByEntityEvent $ev) {
-		$Damager = $ev->getDamager();
+		//TODO
 	}
 }
