@@ -273,6 +273,7 @@ class PanThrowWar extends PluginBase {
     /**
      * @param pocketmine\Player $player
      * 
+     * @return int|bool
      */
     public function getPlayerInGame(Player $player) {
         if(isset($this->InGame[$player->getName()])) {
@@ -286,7 +287,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return pocketmine\utils\Config|bool
      */
-    private function randRoom(Array $filter = []) : ?Config {
+    private function randRoom(Array $filter = []) {
         /**
          * filter:
          *  maxplayer
@@ -451,6 +452,7 @@ class PanThrowWar extends PluginBase {
 
     /**
      * @param int $digit
+     * 
      * @return int
      */
     private function randnum(int $digit) : int {
