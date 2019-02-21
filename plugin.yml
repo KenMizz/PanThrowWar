@@ -3,12 +3,12 @@ author: 游乐14
 version: 1.0.0
 main: yl14\PanThrowWar\PanThrowWar
 api:
-  - 3.5.9
+  - 3.6.2
 
 commands:
   pw:
     permission: pw.op
-    description: ThrowPanWar
+    description: PanThrowWar
     usage: 输入/pw help查看帮助
 
 permissions:
