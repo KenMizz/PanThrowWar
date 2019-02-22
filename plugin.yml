@@ -7,7 +7,7 @@ depend:
   - GameWizard
 
 api:
-  - 3.6.2
+  - 3.6.3
 
 commands:
   pw:
