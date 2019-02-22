@@ -2,6 +2,10 @@ name: PanThrowWar
 author: 游乐14
 version: 1.0.0
 main: yl14\PanThrowWar\PanThrowWar
+depend:
+  - GameCoreAPI
+  - GameWizard
+
 api:
   - 3.6.2
 
