@@ -12,6 +12,7 @@ use pocketmine\level\Position;
 use pocketmine\item\Item;
 
 use yl13\GameCoreAPI\GameCoreAPI as GCAPI;
+use yl13\GameWizard\GameWizard as GW;
 
 class PanThrowWar extends PluginBase {
 
@@ -104,7 +105,7 @@ class PanThrowWar extends PluginBase {
          *  maxplayer
          *  mapname(WIP)
          */
-
+        
     }
 
     /**
@@ -143,14 +144,7 @@ class PanThrowWar extends PluginBase {
      * @return bool
      */
     private function leaveRoom(array $players, int $sessionid, int $reason = 0) : bool {
-        $Session = $this->getRoomById($sessionid);
-        if($Session instanceof PTWSession) {
-            foreach($players as $p) {
-                if($p instanceof Player) {
-                    //TODO
-                }
-            }
-        }
+        //TODO
     }
 
     /**
