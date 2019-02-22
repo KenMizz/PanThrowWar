@@ -11,6 +11,8 @@ use pocketmine\Player;
 use pocketmine\level\Position;
 use pocketmine\item\Item;
 
+use yl13\GameCoreAPI\GameCoreAPI as GCAPI;
+
 class PanThrowWar extends PluginBase {
 
     const VERSION = '1.0.0';
@@ -23,6 +25,7 @@ class PanThrowWar extends PluginBase {
 
     public $prefix = TF::GREEN."[丢锅大战]".TF::WHITE;
     private $onset = [];
+    private $gameid = 0;
 
     public function onEnable() {
         $this->getLogger()->notice(TF::YELLOW."丢锅大战已启用，初始化插件中...");
@@ -39,6 +42,7 @@ class PanThrowWar extends PluginBase {
     }
 
     private function initPlugin() {
+        GCAPI::getInstance()->api->getGameCoreAPI()->registerGame("丢锅大战", "游乐14");
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
         if(!is_dir($this->getDataFolder())) {
             @mkdir($this->getDataFolder());
@@ -79,6 +83,15 @@ class PanThrowWar extends PluginBase {
     }
 
     /**
+     * @param pocketmine\Player $player
+     * 
+     * @return int|bool
+     */
+    public function getPlayerInGame(Player $player) : ?int {
+        return $this->InGame[$player->getName()] ?? false;
+    }
+
+    /**
      * @param pocketmine\Player[] $players
      * @param array $filter
      * 
@@ -109,6 +122,7 @@ class PanThrowWar extends PluginBase {
             foreach($players as $p) {
                 if($p instanceof Player) {
                     $Session->addPlayer($p);
+                    $this->InGame[$p->getName()] = $sessionid;
                     $p->getInventory()->clearAll();
                     $p->getArmorInventory()->clearAll();
                     $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelByName($Session->getLevelName())));
@@ -124,12 +138,19 @@ class PanThrowWar extends PluginBase {
     /**
      * @param pocketmine\Player[] $players
      * @param int $sessionid
-     * @param int $reason
+     * @param int $reason //0 = 正常退出 1 = 输了 2 = 强制退出
      * 
      * @return bool
      */
     private function leaveRoom(array $players, int $sessionid, int $reason = 0) : bool {
-
+        $Session = $this->getRoomById($sessionid);
+        if($Session instanceof PTWSession) {
+            foreach($players as $p) {
+                if($p instanceof Player) {
+                    //TODO
+                }
+            }
+        }
     }
 
     /**
@@ -137,7 +158,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return bool
      */
-    public function closeRoom(int $sessionid) : bool {
+    public function closeRoom(int $sessionid, int $taskid) : bool {
 
     }
 
