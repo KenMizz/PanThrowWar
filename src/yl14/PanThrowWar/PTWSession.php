@@ -172,4 +172,24 @@ class PTWSession {
         }
         return false;
     }
+
+    /**
+     * @return int
+     */
+    public function getStatus() : int {
+        return $this->status;
+    }
+
+    /**
+     * @param int $status
+     * 
+     * @return bool
+     */
+    public function setStatus(int $status) : bool {
+        if($status != 0 or $status != 1 or $status != 2) {
+            return false;
+        }
+        $this->status = $status;
+        return true;
+    }
 }

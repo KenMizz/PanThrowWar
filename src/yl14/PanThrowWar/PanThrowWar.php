@@ -8,6 +8,8 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\{TextFormat as TF, Config};
 use pocketmine\command\{Command, CommandSender};
 use pocketmine\Player;
+use pocketmine\level\Position;
+use pocketmine\item\Item;
 
 class PanThrowWar extends PluginBase {
 
@@ -54,6 +56,29 @@ class PanThrowWar extends PluginBase {
     }
 
     /**
+     * @param int $sessionid
+     * 
+     * @return PTWSession|bool
+     */
+    public function getRoomById(int $sessionid) : ?PTWSession {
+        return $this->Sessions[$sessionid] ?? false;
+    }
+
+    /**
+     * @param int $sessionid
+     * @param PTWSession $Session
+     * 
+     * @return bool
+     */
+    private function updateSession(int $sessionid, PTWSession $Session) : bool {
+        if(isset($this->Sessions[$sessionid])) {
+            $this->Sessions[$sessionid] = $Session;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @param pocketmine\Player[] $players
      * @param array $filter
      * 
@@ -66,15 +91,54 @@ class PanThrowWar extends PluginBase {
          *  maxplayer
          *  mapname(WIP)
          */
-        if(!empty($filter)) {
-            if(isset($filter['maxplayer'])) {
-                //先遍历所有Session看看有没有能用的
-                foreach($this->Sessions as $Session) {
-                    //TODO
-                    return true;
+
+    }
+
+    /**
+     * @param pocketmine\Player[] $players
+     * @param int $sessionid
+     * 
+     * @return bool
+     */
+    private function joinRoom(array $players, int $sessionid) : bool {
+        $Session = $this->getRoomById($sessionid);
+        if($Session instanceof PTWSession) {
+            $waitinglocation = $Session->getWaitingLocation();
+            $exitwool = Item::get(Item::WOOL);
+            $exitwool->setCustomName("离开房间");
+            foreach($players as $p) {
+                if($p instanceof Player) {
+                    $Session->addPlayer($p);
+                    $p->getInventory()->clearAll();
+                    $p->getArmorInventory()->clearAll();
+                    $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelByName($Session->getLevelName())));
+                    $p->getInventory()->addItem($exitwool);
+                    $this->updateSession($sessionid, $Session);
                 }
             }
+            return true;
         }
+        return false;
+    }
+
+    /**
+     * @param pocketmine\Player[] $players
+     * @param int $sessionid
+     * @param int $reason
+     * 
+     * @return bool
+     */
+    private function leaveRoom(array $players, int $sessionid, int $reason = 0) : bool {
+
+    }
+
+    /**
+     * @param int $sessionid
+     * 
+     * @return bool
+     */
+    public function closeRoom(int $sessionid) : bool {
+
     }
 
     public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args) : bool {
