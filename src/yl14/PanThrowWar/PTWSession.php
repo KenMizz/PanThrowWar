@@ -11,7 +11,6 @@ class PTWSession {
 
     private $status = 0; //0 = waiting 1 = onready 2 = ready
     private $players = [];
-    private $spectators = [];
 
     private $sessionid;
     private $levelname;
@@ -86,46 +85,14 @@ class PTWSession {
     /**
      * @param pocketmine\Player $player
      * 
-     * @return pocketmine\Player|bool
-     */
-    public function getPlayer(Player $player) : ?Player {
-        return $this->players[$player->getName()] ?? false;
-    }
-
-    /**
-     * @return pocketmine\Player[]
-     */
-    public function getPlayers() : array {
-        return $this->players;
-    }
-
-    /**
-     * @param pocketmine\Player $player
-     * 
-     * @return pocketmine\Player|bool
-     */
-    public function getSpectator(Player $player) : ?Player {
-        return $this->spectators[$player->getName()] ?? false;
-    }
-
-    /**
-     * @return pocketmine\Player[]
-     */
-    public function getSpectators() : array {
-        return $this->spectators;
-    }
-
-    /**
-     * @param pocketmine\Player $player
-     * 
      * @return bool
      */
     public function addPlayer(Player $player) : bool {
         if(!isset($this->players[$player->getName()])) {
-            $this->players[$player->getName()] = $player;
-            if(isset($this->spectators[$player->getName()])) {
-                $this->removeSpectator($player);
-            }
+            $this->players[$player->getName()] = array(
+                'player' => $player,
+                'isSpectator' => false
+            );
             return true;
         }
         return false;
@@ -149,12 +116,9 @@ class PTWSession {
      * 
      * @return bool
      */
-    public function addSpectator(Player $player) : bool {
-        if(!isset($this->spectators[$player->getName()])) {
-            $this->spectators[$player->getName()] = $player;
-            if(isset($this->players[$player->getName()])) {
-                $this->removePlayer($player);
-            }
+    public function setSpectator(Player $player) : bool {
+        if(isset($this->players[$player->getName()])) {
+            $this->players[$player->getName()]['isSpectator'] = true;
             return true;
         }
         return false;
@@ -165,12 +129,24 @@ class PTWSession {
      * 
      * @return bool
      */
-    public function removeSpectator(Player $player) : bool {
-        if(isset($this->spectators[$player->getName()])) {
-            unset($this->spectators[$player->getName()]);
-            return true;
-        }
-        return false;
+    public function isSpectator(Player $player) : bool {
+        return $this->players[$player->getName()]['isSpectator'] ?? false;
+    }
+
+    /**
+     * @param pocketmine\Player $player
+     * 
+     * @return pocketmine\Player|bool
+     */
+    public function getPlayer(Player $player) : ?Player {
+        return $this->players[$player->getName()]['player'] ?? false;
+    }
+
+    /**
+     * @return pocketmine\Player[]
+     */
+    public function getPlayers() : array {
+        return $this->players;
     }
 
     /**
