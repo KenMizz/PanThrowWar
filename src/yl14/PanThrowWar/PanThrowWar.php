@@ -71,6 +71,7 @@ class PanThrowWar extends PluginBase {
                 //先遍历所有Session看看有没有能用的
                 foreach($this->Sessions as $Session) {
                     //TODO
+                    return true;
                 }
             }
         }
@@ -110,7 +111,98 @@ class PanThrowWar extends PluginBase {
                         $name = $this->onset[$sender->getName()]['name'];
                         unset($this->onset[$sender->getName()]);
                         $sender->sendMessage($this->prefix."已取消房间配置文件{$name}的设置");
+                        return true;
                     }
+                    $this->onset[$sender->getName()] = array(
+                        'name' => $args[1],
+                        'levelname' => $sender->getLevel()->getFolderName(),
+                        'waitinglocation' => array(
+                            'x' => 0,
+                            'y' => 0,
+                            'z' => 0
+                        ),
+                        'playinglocation' => array(
+                            'x' => 0,
+                            'y' => 0,
+                            'z' => 0
+                        ),
+                        'settings' => array(
+                            'gametime' => 600,
+                            'maxplayer' => 4,
+                            'minplayer' => 2,
+                            'money' => 10
+                        )
+                    );
+                    $sender->sendMessage($this->prefix."开始进行丢锅大战房间配置文件的配置，输入/pw w 设置等待位置，/pw p 设置游玩位置，一切就绪后，输入/pw f 完成配置");
+                    return true;
+                break;
+
+                case 'w':
+                    if(!$sender instanceof Player) {
+                        return false;
+                    }
+                    if(!isset($this->onset[$sender->getName()])) {
+                        return false;
+                    }
+                    $this->onset[$sender->getName()]['waitinglocation'] = array(
+                        'x' => $sender->x,
+                        'y' => $sender->y,
+                        'z' => $sender->z,
+                    );
+                    $sender->sendMessage($this->prefix."设置玩家等待位置成功");
+                    return true;
+                break;
+
+                case 'p':
+                    if(!$sender instanceof Player) {
+                        return false;
+                    }
+                    if(!isset($this->onset[$sender->getName()])) {
+                        return false;
+                    }
+                    $this->onset[$sender->getName()]['playinglocation'] = array(
+                        'x' => $sender->x,
+                        'y' => $sender->y,
+                        'z' => $sender->z,
+                    );
+                    $sender->sendMessage($this->prefix."设置玩家游玩位置成功");
+                    return true;
+                break;
+
+                case 'f':
+                    if(!isset($this->onset[$sender->getName()])) {
+                        return false;
+                    }
+                    $name = $this->onset[$sender->getName()]['name'];
+                    $con = new Config($this->getDataFolder()."rooms/{$name}.yml", Config::YAML);
+                    $con->setAll($this->onset[$sender->getName()]);
+                    $con->save();
+                    unset($this->onset[$sender->getName()]);
+                    $sender->sendMessage($this->prefix."房间配置文件{$name}配置成功，需要配置更多的话请到指定文件进行修改，并且使用/pw reload来重新加载配置文件");
+                    return true;
+                break;
+
+                case 'remove':
+                    if(!is_file($this->getDataFolder()."rooms/{$args[1]}.yml")) {
+                        return false;
+                    }
+                    $unlink = unlink($this->getDataFolder()."rooms/{$args[1]}.yml");
+                    if(!$unlink) {
+                        $sender->sendMessage($this->prefix."删除房间配置文件{$args[1]}失败，请检查PocketMine是否有足够的权限");
+                        return true;
+                    }
+                    $sender->sendMessage($this->prefix."移除房间配置文件{$args[1]}成功");
+                    return true;
+                break;
+
+                case 'reload':
+                    if(!is_file($this->getDataFolder()."rooms/{$args[1]}.yml")) {
+                        return false;
+                    }
+                    $con = new Config($this->getDataFolder()."rooms/{$args[1]}.yml", Config::YAML);
+                    $con->reload();
+                    $sender->sendMessage($this->prefix."重新加载房间配置文件{$args[1]}成功");
+                    return true;
             }
         }
     }
