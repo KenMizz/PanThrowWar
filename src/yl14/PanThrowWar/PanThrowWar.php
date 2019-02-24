@@ -106,7 +106,32 @@ class PanThrowWar extends PluginBase {
          *  maxplayer
          *  mapname(WIP)
          */
-        
+        if(!empty($filter)) {
+            if(isset($filter['maxplayer'])) {
+                foreach($this->Sessions as $Session) { // 先遍历所有Session看看有没有可用的
+                    if($Session instanceof PTWSession) {
+                        if($Session->getMaxPlayer() == $filter['maxplayer']) { //确定是其需要的
+                            if($Session->getStatus() == 0 or $Session->getStatus() == 1) { //确定是可以加入的状态
+                                if(!count($Session->getPlayers()) + count($players) < $Session->getMaxPlayer()) { //确保不会超出可加入人数
+                                    $result = $this->joinRoom($players, $Session->getSessionId());
+                                    if(!$result) {
+                                        continue;
+                                    }
+                                }
+                                continue;
+                            }
+                            continue;
+                        }
+                        continue;
+                    }
+                    continue;
+                }
+                //没有任何可用的房间，那么自己创建
+                $room = $this->randRoom($filter);
+                //TODO
+    
+            }
+        }
     }
 
     /**
@@ -237,6 +262,23 @@ class PanThrowWar extends PluginBase {
             $id .= mt_rand(0, 9);
         }
         return (int)$id;
+    }
+
+    /**
+     * @param array $filter not required
+     * 
+     * @return Config|bool
+     */
+    private function randRoom($filter = []) : ?Config {
+        $sdir = scandir($this->getDataFolder()."rooms/");
+        $rooms = [];
+        foreach($sdir as $dir) {
+            $pdir = pathinfo($dir);
+            if($pdir['extension'] == 'yml') {
+                $rooms[] = $pdir['basename'];
+            }
+        }
+        //TODO
     }
 
     public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args) : bool {
