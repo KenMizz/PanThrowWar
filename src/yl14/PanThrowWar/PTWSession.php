@@ -147,7 +147,7 @@ class PTWSession {
      * 
      * @return pocketmine\Player|bool
      */
-    public function getPlayer(Player $player) : ?Player {
+    public function getPlayer(Player $player) {
         return $this->players[$player->getName()]['player'] ?? false;
     }
 
