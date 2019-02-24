@@ -17,13 +17,15 @@ class PTWSession {
     private $waitinglocation;
     private $playinglocation;
     private $settings;
+    private $taskid;
 
-    public function __construct(int $sessionid, string $levelname, array $waitinglocation, array $playinglocation, array $settings) {
+    public function __construct(int $sessionid, string $levelname, array $waitinglocation, array $playinglocation, array $settings, int $taskid) {
         $this->sessionid = $sessionid;
         $this->levelname = $levelname;
         $this->waitinglocation = $waitinglocation;
         $this->playinglocation = $playinglocation;
         $this->settings = $settings;
+        $this->taskid = $taskid;
     }
 
     /**
@@ -31,6 +33,13 @@ class PTWSession {
      */
     public function getSessionId() : int {
         return $this->sessionid;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTaskId() : int {
+        return $this->taskid;
     }
 
     /**
