@@ -28,21 +28,22 @@ class PanThrowWar extends PluginBase {
     private $onset = [];
     private $gameid = 0;
 
-    public function onEnable() {
+    public function onEnable() : void {
         $this->getLogger()->notice(TF::YELLOW."丢锅大战已启用，初始化插件中...");
         $this->initPlugin();
         $this->getLogger()->notice(TF::GREEN."插件初始化成功");
     }
 
-    public function onLoad() {
+    public function onLoad() : void {
         self::$instance = $this;
     }
 
-    public function onDisable() {
-        //TODO
+    public function onDisable() : void {
+        $this->closeAllRoom();
+        $this->getLogger()->warning("丢锅大战已停用");
     }
 
-    private function initPlugin() {
+    private function initPlugin() : void {
         GCAPI::getInstance()->api->getGameCoreAPI()->registerGame("丢锅大战", "游乐14");
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
         if(!is_dir($this->getDataFolder())) {
@@ -120,10 +121,12 @@ class PanThrowWar extends PluginBase {
             $waitinglocation = $Session->getWaitingLocation();
             $exitwool = Item::get(Item::WOOL);
             $exitwool->setCustomName("离开房间");
+            GCAPI::getInstance()->api->getChatChannelAPI()->addPlayer($this->gameid, (string)$sessionid, $players);
             foreach($players as $p) {
                 if($p instanceof Player) {
                     $Session->addPlayer($p);
                     $this->InGame[$p->getName()] = $sessionid;
+                    $p->setGamemode(0);
                     $p->getInventory()->clearAll();
                     $p->getArmorInventory()->clearAll();
                     $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelByName($Session->getLevelName())));
@@ -139,12 +142,43 @@ class PanThrowWar extends PluginBase {
     /**
      * @param pocketmine\Player[] $players
      * @param int $sessionid
-     * @param int $reason //0 = 正常退出 1 = 输了 2 = 强制退出
+     * @param int $reason 1: 正常退出|强制退出 2:输了 3:赢了
      * 
      * @return bool
      */
     private function leaveRoom(array $players, int $sessionid, int $reason = 0) : bool {
-        //TODO
+        $Session = $this->getRoomById($sessionid);
+        if($Session instanceof PTWSession) {
+            foreach($players as $p) {
+                if($p instanceof Player) {
+                    if($Session->getPlayer($p) instanceof Player) { //确保玩家是在房间内的
+                        $Session->removePlayer($p);
+                        GCAPI::getInstance()->api->getChatChannelAPI()->removePlayer($this->gameid, (string)$sessionid, [$p]);
+                        unset($this->InGame[$p->getName()]);
+                        $p->getInventory()->clearAll();
+                        $p->getArmorInventory()->clearAll();
+                        $p->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
+                        GW::GiveCompass($p);
+                        GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (string)$sessionid, "{$p->getName()}".TF::YELLOW."离开了房间");
+                        switch($reason) {
+
+                            default:
+                                return true;
+                            break;
+
+                            case 2:
+                                $p->sendMessage(TF::YELLOW."你输了！");
+                            break;
+
+                            case 3:
+                                $p->sendMessage(TF::YELLOW."你获得了最后的胜利！");
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -153,7 +187,43 @@ class PanThrowWar extends PluginBase {
      * @return bool
      */
     public function closeRoom(int $sessionid, int $taskid) : bool {
+        $Session = $this->getRoomById($sessionid);
+        if($Session instanceof PTWSession) {
+            $this->leaveRoom($Session->getPlayers(), $sessionid, 1);
+            GCAPI::getInstance()->api->getChatChannelAPI()->remove($this->gameid, (string)$sessionid);
+            $this->getScheduler()->cancelTask($taskid);
+            return true;
+        }
+        return false;
+    }
 
+    /**
+     * @return void
+     */
+    private function closeAllRoom() : void {
+        foreach($this->Sessions as $Session) {
+            if($Session instanceof PTWSession) {
+                $this->closeRoom($Session->getSessionId(), $Session->getTaskId());
+            }
+        }
+    }
+
+    /**
+     * @param int $sessionid
+     * @param string $levelname
+     * @param array $waitinglocation
+     * @param array $playinglocation
+     * @param array $settings
+     * 
+     * @return bool
+     */
+    private function createRoom(int $sessionid, string $levelname, array $waitinglocation, array $playinglocation, array $settings) : bool {
+        if(!isset($this->Sessions[$sessionid])) {
+            $task = $this->getScheduler()->scheduleRepeatingTask(new PTWTask($this, $sessionid), 20);
+            $this->Sessions[$sessionid] = new PTWSession($sessionid, $levelname, $waitinglocation, $playinglocation, $settings, $task->getTaskId());
+            return true;
+        }
+        return false;
     }
 
     public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args) : bool {
