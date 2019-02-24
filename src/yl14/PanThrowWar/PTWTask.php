@@ -17,6 +17,9 @@ class PTWTask extends Task {
     }
 
     public function onRun(int $currentTick) {
-        $Session = $this->plugin->getRoomById($sessionid);
+        $Session = $this->plugin->getRoomById($this->sessionid);
+        if($Session instanceof PTWSession) {
+            
+        }
     }
 }
