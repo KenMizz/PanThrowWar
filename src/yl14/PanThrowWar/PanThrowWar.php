@@ -226,6 +226,19 @@ class PanThrowWar extends PluginBase {
         return false;
     }
 
+    /**
+     * @param int $digit
+     * 
+     * @return int
+     */
+    private function randnum(int $digit) : int {
+        $id = null;
+        for($i = 0;$i < $digit;$i ++) {
+            $id .= mt_rand(0, 9);
+        }
+        return (int)$id;
+    }
+
     public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args) : bool {
         if($cmd->getName() == 'pw') {
             if(!isset($args[0])) {
