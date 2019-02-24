@@ -117,6 +117,7 @@ class PanThrowWar extends PluginBase {
                                     if(!$result) {
                                         continue;
                                     }
+                                    return true;
                                 }
                                 continue;
                             }
@@ -128,10 +129,52 @@ class PanThrowWar extends PluginBase {
                 }
                 //没有任何可用的房间，那么自己创建
                 $room = $this->randRoom($filter);
-                //TODO
-    
+                if($room instanceof Config) {
+                    $roomid = $this->randnum(8);
+                    $result = $this->createRoom($roomid, $room->get('levelname'), $room->get('waitinglocation'), $room->get('playinglocation'), $room->get('settings'));
+                    if($result) {
+                        $rj = $this->joinRoom($players, $roomid);
+                        if(!$rj) {
+                            return false;
+                        }
+                        return true;
+                    }
+                    return false;
+                }  
+                return false;  
             }
         }
+        foreach($this->Sessions as $Session) { // 先遍历所有Session看看有没有可用的
+            if($Session instanceof PTWSession) {
+                if($Session->getStatus() == 0 or $Session->getStatus() == 1) { //确定是可以加入的状态
+                    if(!count($Session->getPlayers()) + count($players) < $Session->getMaxPlayer()) { //确保不会超出可加入人数
+                        $result = $this->joinRoom($players, $Session->getSessionId());
+                        if(!$result) {
+                            continue;
+                        }
+                        return true;
+                    }
+                    continue;
+                }
+                continue;
+            }
+            continue;
+        }
+        //没有任何可用的房间，那么自己创建
+        $room = $this->randRoom();
+        if($room instanceof Config) {
+            $roomid = $this->randnum(8);
+            $result = $this->createRoom($roomid, $room->get('levelname'), $room->get('waitinglocation'), $room->get('playinglocation'), $room->get('settings'));
+            if($result) {
+                $rj = $this->joinRoom($players, $roomid);
+                if(!$rj) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }  
+        return false;  
     }
 
     /**
@@ -269,7 +312,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return Config|bool
      */
-    private function randRoom($filter = []) : ?Config {
+    private function randRoom($filter = []) {
         $sdir = scandir($this->getDataFolder()."rooms/");
         $rooms = [];
         foreach($sdir as $dir) {
@@ -278,7 +321,30 @@ class PanThrowWar extends PluginBase {
                 $rooms[] = $pdir['basename'];
             }
         }
-        //TODO
+        if(!empty($rooms)) {
+            if(!empty($filter)) {
+                if(isset($filter['maxplayer'])) {
+                    $filterrooms = [];
+                    foreach($rooms as $room) {
+                        $con = new Config($this->getDataFolder()."rooms/{$room}.yml", Config::YAML);
+                        $settings = $con->get('settings');
+                        if($settings['maxplayer'] == $filter['maxplayer']) { //是玩家想要的
+                            $filterrooms[] = $room;
+                        }
+                        continue;
+                    }
+                    if(!empty($filterrooms)) {
+                        shuffle($filterrooms);
+                        return new Config($this->getDataFolder()."rooms/{$filterrooms[0]}.yml", Config::YAML);
+                    }
+                    return false;
+                }
+                return false;
+            }
+            shuffle($rooms);
+            return new Config($this->getDataFolder()."rooms/{$rooms[0]}.yml", Config::YAML);
+        }
+        return false;
     }
 
     public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args) : bool {
