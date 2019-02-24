@@ -17,6 +17,6 @@ class PTWTask extends Task {
     }
 
     public function onRun(int $currentTick) {
-        //TODO
+        $Session = $this->plugin->getRoomById($sessionid);
     }
 }
