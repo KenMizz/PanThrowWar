@@ -92,6 +92,20 @@ class PTWSession {
     }
 
     /**
+     * @return int
+     */
+    public function getExplodeTime() : int {
+        return $this->settings['explodetime'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getSwitchingTime() : int {
+        return $this->settings['switchingtime'];
+    }
+
+    /**
      * @param pocketmine\Player $player
      * 
      * @return bool
