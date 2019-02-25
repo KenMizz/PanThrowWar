@@ -8,7 +8,7 @@ use pocketmine\event\Listener;
 use pocketmine\event\{
     player\PlayerQuitEvent, player\PlayerDropItemEvent, player\PlayerItemHeldEvent, entity\EntityArmorChangeEvent, entity\EntityDamageByEntityEvent, block\BlockPlaceEvent, block\BlockBreakEvent
 };
-use pocketmine\Player;
+use pocketmine\item\Item;
 
 class EventListener implements Listener {
 
@@ -51,10 +51,8 @@ class EventListener implements Listener {
     public function onPlayerItemHeld(PlayerItemHeldEvent $ev) {
         $Item = $ev->getItem();
         $player = $ev->getPlayer();
-        $exitwool = Item::get(Item::WOOL);
-        $exitwool->setCustomName("离开房间");
         if($this->plugin->getPlayerInGame($player)) {
-            if($Item == $exitwool) {
+            if($Item->getCustomName() == "离开房间") {
                 if(!isset($this->onQuit[$player->getName()])) {
                     $ev->setCancelled();
                     $this->onQuit[$player->getName()] = $player->getName();

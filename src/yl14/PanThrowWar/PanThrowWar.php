@@ -260,6 +260,7 @@ class PanThrowWar extends PluginBase {
             $this->leaveRoom($Session->getPlayers(), $sessionid, 1);
             GCAPI::getInstance()->api->getChatChannelAPI()->remove($this->gameid, (string)$sessionid);
             $this->getScheduler()->cancelTask($taskid);
+            unset($this->Sessions[$sessionid]);
             return true;
         }
         return false;
