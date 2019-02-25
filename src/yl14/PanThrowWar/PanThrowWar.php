@@ -402,7 +402,9 @@ class PanThrowWar extends PluginBase {
                             'gametime' => 600,
                             'maxplayer' => 4,
                             'minplayer' => 2,
-                            'money' => 10
+                            'money' => 10,
+                            'explodetime' => 60,
+                            'switchingtime' => 5,
                         )
                     );
                     $sender->sendMessage($this->prefix."开始进行丢锅大战房间配置文件的配置，输入/pw w 设置等待位置，/pw p 设置游玩位置，一切就绪后，输入/pw f 完成配置");
