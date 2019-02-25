@@ -226,6 +226,8 @@ class PanThrowWar extends PluginBase {
                         $p->getInventory()->clearAll();
                         $p->getArmorInventory()->clearAll();
                         $p->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
+                        $p->setGamemode(0);
+                        $p->removeAllEffects();
                         GW::GiveCompass($p);
                         GCAPI::getInstance()->api->getChatChannelAPI()->broadcastMessage($this->gameid, (string)$sessionid, "{$p->getName()}".TF::YELLOW."离开了房间");
                         switch($reason) {
