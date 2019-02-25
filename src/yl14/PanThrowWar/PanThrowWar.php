@@ -289,6 +289,7 @@ class PanThrowWar extends PluginBase {
         if(!isset($this->Sessions[$sessionid])) {
             $task = $this->getScheduler()->scheduleRepeatingTask(new PTWTask($this, $sessionid), 20);
             $this->Sessions[$sessionid] = new PTWSession($sessionid, $levelname, $waitinglocation, $playinglocation, $settings, $task->getTaskId());
+            GCAPI::getInstance()->api->getChatChannelAPI()->create($this->gameid, (string)$sessionid);
             return true;
         }
         return false;
