@@ -198,7 +198,7 @@ class PanThrowWar extends PluginBase {
                     $p->getInventory()->clearAll();
                     $p->getArmorInventory()->clearAll();
                     $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelByName($Session->getLevelName())));
-                    $p->getInventory()->addItem($exitwool);
+                    $p->getInventory()->setItem(1, $exitwool);
                     $this->updateSession($sessionid, $Session);
                 }
             }
@@ -214,7 +214,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return bool
      */
-    private function leaveRoom(array $players, int $sessionid, int $reason = 0) : bool {
+    public function leaveRoom(array $players, int $sessionid, int $reason = 1) : bool {
         $Session = $this->getRoomById($sessionid);
         if($Session instanceof PTWSession) {
             foreach($players as $p) {
