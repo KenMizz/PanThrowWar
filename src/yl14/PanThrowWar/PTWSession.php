@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace yl14\PanThrowWar;
 
 use pocketmine\Player;
+use pocketmine\entity\EffectInstance;
+use pocketmine\entity\Effect;
 
 
 class PTWSession {
@@ -141,6 +143,11 @@ class PTWSession {
      */
     public function setSpectator(Player $player) : bool {
         if(isset($this->players[$player->getName()])) {
+            $player->removeAllEffects();
+            $player->getArmorInventory()->clearAll();
+            $player->getInventory()->clearAll();
+            $player->setGamemode(1);
+            $player->addEffect(new EffectInstance(Effect::getEffect(Effect::INVISIBILITY), 300 * 900, 1, false));
             $this->players[$player->getName()]['isSpectator'] = true;
             return true;
         }
