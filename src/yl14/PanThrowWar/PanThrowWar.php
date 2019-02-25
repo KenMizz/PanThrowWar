@@ -198,7 +198,7 @@ class PanThrowWar extends PluginBase {
                     $p->getInventory()->clearAll();
                     $p->getArmorInventory()->clearAll();
                     $p->teleport(new Position($waitinglocation['x'], $waitinglocation['y'], $waitinglocation['z'], $this->getServer()->getLevelByName($Session->getLevelName())));
-                    $p->getInventory()->setItem(1, $exitwool);
+                    $p->getInventory()->setItem(8, $exitwool);
                     $this->updateSession($sessionid, $Session);
                 }
             }
