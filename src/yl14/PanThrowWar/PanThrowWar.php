@@ -89,7 +89,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return int|bool
      */
-    public function getPlayerInGame(Player $player) : ?int {
+    public function getPlayerInGame(Player $player) {
         return $this->InGame[$player->getName()] ?? false;
     }
 
@@ -318,7 +318,7 @@ class PanThrowWar extends PluginBase {
         foreach($sdir as $dir) {
             $pdir = pathinfo($dir);
             if($pdir['extension'] == 'yml') {
-                $rooms[] = $pdir['basename'];
+                $rooms[] = $pdir['filename'];
             }
         }
         if(!empty($rooms)) {
