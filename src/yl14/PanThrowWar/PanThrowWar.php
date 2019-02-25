@@ -444,6 +444,7 @@ class PanThrowWar extends PluginBase {
                         return false;
                     }
                     $name = $this->onset[$sender->getName()]['name'];
+                    unset($this->onset[$sender->getName()]['name']);
                     $con = new Config($this->getDataFolder()."rooms/{$name}.yml", Config::YAML);
                     $con->setAll($this->onset[$sender->getName()]);
                     $con->save();
