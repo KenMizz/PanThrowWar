@@ -44,7 +44,7 @@ class PanThrowWar extends PluginBase {
     }
 
     private function initPlugin() : void {
-        GCAPI::getInstance()->api->getGameCoreAPI()->registerGame("丢锅大战", "游乐14");
+        $this->gameid = GCAPI::getInstance()->api->getGameCoreAPI()->registerGame("丢锅大战", "游乐14");
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
         if(!is_dir($this->getDataFolder())) {
             @mkdir($this->getDataFolder());
