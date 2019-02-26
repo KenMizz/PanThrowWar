@@ -182,9 +182,24 @@ class PTWSession {
     public function getPlayers() : array {
         $players = [];
         foreach($this->players as $player) {
-            $players[] = $player['player'];
+            if(!$player['isSpectator']) {
+                $players[] = $player['player'];
+            }
         }
         return $players;
+    }
+
+    /**
+     * @return pocketmine\Player[]
+     */
+    public function getSpectators() : array {
+        $spectators = [];
+        foreach($this->players as $player) {
+            if($player['isSpectator']) {
+                $spectators[] = $player['player'];
+            }
+        }
+        return $spectators;
     }
 
     /**
