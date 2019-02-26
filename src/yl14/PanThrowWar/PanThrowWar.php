@@ -94,6 +94,20 @@ class PanThrowWar extends PluginBase {
     }
 
     /**
+     * @return yl13\GameCoreAPI
+     */
+    public function getGameCoreAPI() : GCAPI {
+        return GCAPI::getInstance();
+    }
+
+    /**
+     * return int
+     */
+    public function getGameId(PTWTask $task) : int {
+        return $this->gameid;
+    }
+
+    /**
      * @param pocketmine\Player[] $players
      * @param array $filter
      * 
