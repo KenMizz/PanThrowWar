@@ -10,6 +10,8 @@ use pocketmine\event\{
 };
 use pocketmine\item\Item;
 use pocketmine\Player;
+use pocketmine\entity\EffectInstance;
+use pocketmine\entity\Effect;
 
 class EventListener implements Listener {
 
@@ -91,12 +93,18 @@ class EventListener implements Listener {
         $entity = $ev->getEntity();
         if($damager instanceof Player) {
             if($this->plugin->getPlayerInGame($damager)) {
+                $ev->setCancelled();
                 if($damager->getArmorInventory()->getHelmet() == Item::get(Item::MOB_HEAD, 4)) {
                     if($entity instanceof Player) {
                         if($this->plugin->getPlayerInGame($entity)) {
                             $Session = $this->plugin->getRoomById($this->plugin->getPlayerInGame($damager));
                             if(!$Session->isSpectator($entity)) {
-                                
+                                $damager->getArmorInventory()->setHelmet(Item::get(Item::AIR));
+                                $damager->removeAllEffects();
+                                $entity->getArmorInventory()->setHelmet(Item::get(Item::MOB_HEAD, 4));
+                                $entity->removeAllEffects();
+                                $entity->addEffect(new EffectInstance(Effect::getEffect(Effect::SPEED), 300 * 300, 1, false));
+                                $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$entity->getName()}成功背锅！", $Session->getPlayers());
                             }
                         }
                     }
