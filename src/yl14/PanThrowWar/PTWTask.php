@@ -129,7 +129,17 @@ class PTWTask extends Task {
                             foreach($Session->getPlayers() as $player) {
                                 if($player instanceof Player) {
                                     if($player->getArmorInventory()->getHelmet() == Item::get(Item::MOB_HEAD, 4)) { //锅子携带者
-
+                                        $Session->setSpectator($player);
+                                        $this->plugin->updateSession($Session->getSessionId(), $Session);
+                                        $player->sendMessage($this->plugin->prefix."你因背锅而死，通过白色羊毛即可离开房间");
+                                        $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$player->getName()}因背锅而死");
+                                        $this->switchingtime = $Session->getSwitchingTime();
+                                        $this->explodeCountdown = $Session->getExplodeTime();
+                                        $this->onSwitching = true;
+                                        $this->explodeCountdown = false;
+                                        $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."将在{$Session->getSwitchingTime()}秒后随机抽取玩家背锅", $Session->getPlayers());
+                                        //TODO: 粒子特效，声效
+                                        break;
                                     }
                                 }
                             }
