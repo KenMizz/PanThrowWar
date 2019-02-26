@@ -203,6 +203,17 @@ class PTWSession {
     }
 
     /**
+     * @return pocketmine\Player[]
+     */
+    public function getAllPlayers() : array {
+        $players = [];
+        foreach($this->players as $player) {
+            $players[] = $player['player'];
+        }
+        return $players;
+    }
+
+    /**
      * @return int
      */
     public function getStatus() : int {
