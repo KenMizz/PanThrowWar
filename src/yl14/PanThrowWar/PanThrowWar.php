@@ -112,7 +112,7 @@ class PanThrowWar extends PluginBase {
                     if($Session instanceof PTWSession) {
                         if($Session->getMaxPlayer() == $filter['maxplayer']) { //确定是其需要的
                             if($Session->getStatus() == 0 or $Session->getStatus() == 1) { //确定是可以加入的状态
-                                if(!count($Session->getPlayers()) + count($players) < $Session->getMaxPlayer()) { //确保不会超出可加入人数
+                                if(!count($Session->getAllPlayers()) + count($players) < $Session->getMaxPlayer()) { //确保不会超出可加入人数
                                     $result = $this->joinRoom($players, $Session->getSessionId());
                                     if(!$result) {
                                         continue;
@@ -147,7 +147,7 @@ class PanThrowWar extends PluginBase {
         foreach($this->Sessions as $Session) { // 先遍历所有Session看看有没有可用的
             if($Session instanceof PTWSession) {
                 if($Session->getStatus() == 0 or $Session->getStatus() == 1) { //确定是可以加入的状态
-                    if(!count($Session->getPlayers()) + count($players) < $Session->getMaxPlayer()) { //确保不会超出可加入人数
+                    if(!count($Session->getAllPlayers()) + count($players) < $Session->getMaxPlayer()) { //确保不会超出可加入人数
                         $result = $this->joinRoom($players, $Session->getSessionId());
                         if(!$result) {
                             continue;
@@ -255,7 +255,7 @@ class PanThrowWar extends PluginBase {
     public function closeRoom(int $sessionid, int $taskid) : bool {
         $Session = $this->getRoomById($sessionid);
         if($Session instanceof PTWSession) {
-            $this->leaveRoom($Session->getPlayers(), $sessionid, 1);
+            $this->leaveRoom($Session->getAllPlayers(), $sessionid, 1);
             GCAPI::getInstance()->api->getChatChannelAPI()->remove($this->gameid, (string)$sessionid);
             $this->getScheduler()->cancelTask($taskid);
             unset($this->Sessions[$sessionid]);
