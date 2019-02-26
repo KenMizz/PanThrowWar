@@ -66,7 +66,7 @@ class PanThrowWar extends PluginBase {
      * 
      * @return PTWSession|bool
      */
-    public function getRoomById(int $sessionid) : ?PTWSession {
+    public function getRoomById(int $sessionid) {
         return $this->Sessions[$sessionid] ?? false;
     }
 
