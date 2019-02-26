@@ -19,6 +19,7 @@ class PTWTask extends Task {
     private $readyCountdown = 10;
     private $switchingtime = 0;
     private $explodetime = 0;
+    private $gametime = 0;
     private $onSwitching = true;
     private $explodeCountdown = false;
 
@@ -33,6 +34,7 @@ class PTWTask extends Task {
         if($Session instanceof PTWSession) {
             $this->switchingtime = $Session->getSwitchingTime();
             $this->explodetime = $Session->getExplodeTime();
+            $this->gametime = $Session->getGameTime();
         }
     }
 
@@ -49,7 +51,7 @@ class PTWTask extends Task {
                         $Session->setStatus(1);
                         $this->plugin->updateSession($Session->getSessionId(), $Session);
                     }
-                    if(count($Session->getPlayers()) <= 0) {
+                    if(count($Session->getAllPlayers()) <= 0) {
                         $this->plugin->closeRoom($Session->getSessionId(), $Session->getTaskId());
                     }
                 break;
@@ -88,12 +90,13 @@ class PTWTask extends Task {
                             $player->setXpLevel($this->readyCountdown);
                         }
                     }
-                    if(count($Session->getPlayers()) <= 0) {
+                    if(count($Session->getAllPlayers()) <= 0) {
                         $this->plugin->closeRoom($Session->getSessionId(), $Session->getTaskId());
                     }
                 break;
 
                 case 2:
+                    $this->gametime--;
                     $this->switchingtime--;
                     if($this->switchingtime == 0) {
                         $this->switchingtime = $Session->getSwitchingTime();
@@ -144,6 +147,22 @@ class PTWTask extends Task {
                                 }
                             }
                         }
+                    }
+                    if(count($Session->getPlayers()) == 1) {
+                        foreach($Session->getPlayers() as $player) {
+                            $player->sendMessage($this->plugin->prefix."你是最后没有背锅的玩家！你获得了胜利");
+                            $this->plugin->leaveRoom([$player], $Session->getSessionId(), 2);
+                            //$player->sendMessage(TF::YELLOW."你获得了{$Session->getWinMoney()}个{$this->plugin->getGameCoreAPI()->api->getEconomyAPI()->getMoneyName($this->plugin->getGameId($this))}!");
+                            //$this->plugin->getGameCoreAPI()->api->getEconomyAPI()->addMoney($this->plugin->getGameId($this), $player, $Session->getWinMoney());
+                            $this->plugin->closeRoom($Session->getSessionId(), $Session->getTaskId());
+                        }
+                        $this->plugin->leaveRoom($Session->getAllPlayers(), $Session->getSessionId(), 1);
+                    }
+                    if(count($Session->getAllPlayers()) <= 0) {
+                        $this->plugin->closeRoom($Session->getSessionId(), $Session->getTaskId());
+                    }
+                    if(count($Session->getPlayers()) <= 0) {
+                        $this->plugin->closeRoom($Session->getSessionId(), $Session->getTaskId());
                     }
             }
         }
