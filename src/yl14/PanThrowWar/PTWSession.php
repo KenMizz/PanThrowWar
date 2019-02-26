@@ -7,6 +7,7 @@ namespace yl14\PanThrowWar;
 use pocketmine\Player;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Effect;
+use pocketmine\item\Item;
 
 
 class PTWSession {
@@ -143,11 +144,14 @@ class PTWSession {
      */
     public function setSpectator(Player $player) : bool {
         if(isset($this->players[$player->getName()])) {
+            $exitwool = Item::get(Item::WOOL);
+            $exitwool->setCustomName("离开房间");
             $player->removeAllEffects();
             $player->getArmorInventory()->clearAll();
             $player->getInventory()->clearAll();
             $player->setGamemode(1);
             $player->addEffect(new EffectInstance(Effect::getEffect(Effect::INVISIBILITY), 300 * 900, 1, false));
+            $$p->getInventory()->setItem(8, $exitwool);
             $this->players[$player->getName()]['isSpectator'] = true;
             return true;
         }
