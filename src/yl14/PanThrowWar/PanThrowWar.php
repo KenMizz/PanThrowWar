@@ -210,7 +210,7 @@ class PanThrowWar extends PluginBase {
     /**
      * @param pocketmine\Player[] $players
      * @param int $sessionid
-     * @param int $reason 1: 正常退出|强制退出 2:输了 3:赢了
+     * @param int $reason 1: 正常退出|强制退出 2:赢了
      * 
      * @return bool
      */
@@ -237,10 +237,6 @@ class PanThrowWar extends PluginBase {
                             break;
 
                             case 2:
-                                $p->sendMessage(TF::YELLOW."你输了！");
-                            break;
-
-                            case 3:
                                 $p->sendMessage(TF::YELLOW."你获得了最后的胜利！");
                         }
                     }
