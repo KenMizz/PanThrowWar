@@ -148,9 +148,13 @@ class PTWTask extends Task {
                             }
                         }
                     }
+                    if($this->gametime == 0) {
+                        $this->plugin->closeRoom($Session->getSessionId(), $Session->getTaskId());
+                        $this->plugin->getServer()->broadcastMessage(TF::YELLOW."因游戏时间结束，房间已关闭", $Session->getAllPlayers());
+                    }
                     if(count($Session->getPlayers()) == 1) {
                         foreach($Session->getPlayers() as $player) {
-                            $player->sendMessage($this->plugin->prefix."你是最后没有背锅的玩家！你获得了胜利");
+                            $player->sendMessage($this->plugin->prefix."你是最后的玩家！你获得了胜利");
                             $this->plugin->leaveRoom([$player], $Session->getSessionId(), 2);
                             //$player->sendMessage(TF::YELLOW."你获得了{$Session->getWinMoney()}个{$this->plugin->getGameCoreAPI()->api->getEconomyAPI()->getMoneyName($this->plugin->getGameId($this))}!");
                             //$this->plugin->getGameCoreAPI()->api->getEconomyAPI()->addMoney($this->plugin->getGameId($this), $player, $Session->getWinMoney());
