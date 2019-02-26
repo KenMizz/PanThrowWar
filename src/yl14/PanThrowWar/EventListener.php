@@ -12,6 +12,7 @@ use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Effect;
+use pocketmine\utils\TextFormat as TF;
 
 class EventListener implements Listener {
 
@@ -104,7 +105,7 @@ class EventListener implements Listener {
                                 $entity->getArmorInventory()->setHelmet(Item::get(Item::MOB_HEAD, 4));
                                 $entity->removeAllEffects();
                                 $entity->addEffect(new EffectInstance(Effect::getEffect(Effect::SPEED), 300 * 300, 1, false));
-                                $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$entity->getName()}成功背锅！", $Session->getPlayers());
+                                $this->plugin->getServer()->broadcastMessage($this->plugin->prefix."{$damager->getName()}".TF::GREEN."把锅传给了".TF::WHITE.$entity->getName(), $Session->getPlayers());
                             }
                         }
                     }
